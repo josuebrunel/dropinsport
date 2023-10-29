@@ -8,7 +8,10 @@ import (
 	"time"
 
 	"github.com/josuebrunel/sportdropin/app/config"
+	"github.com/josuebrunel/sportdropin/group"
+	generic "github.com/josuebrunel/sportdropin/pkg/echogeneric"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type App struct {
@@ -23,10 +26,15 @@ func NewApp() App {
 func (a App) Run() {
 	// Setup
 	e := echo.New()
+	e.Pre(middleware.AddTrailingSlash())
+	e.Use(middleware.Logger())
+	e.Use(middleware.CORS())
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "OK")
 	})
 
+	groupSVC := group.NewService("group", "uuid")
+	generic.MountService(e, groupSVC)
 	// Start server
 	go func() {
 		if err := e.Start(a.Opts.HTTPAddr); err != nil && err != http.ErrServerClosed {
