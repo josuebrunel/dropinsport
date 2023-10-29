@@ -7,18 +7,20 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/labstack/echo/v4"
 )
 
 type App struct {
-	listenAddr string
+	Opts config.Config
 }
 
-func NewApp(listenAddr string) App {
-	return App{listenAddr: listenAddr}
+func NewApp() App {
+	opts := config.NewConfig()
+	return App{Opts: opts}
 }
 
-func (s App) Run() {
+func (a App) Run() {
 	// Setup
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
@@ -27,7 +29,7 @@ func (s App) Run() {
 
 	// Start server
 	go func() {
-		if err := e.Start(s.listenAddr); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(a.Opts.HTTPAddr); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
