@@ -14,8 +14,11 @@ var store = []*Group{}
 
 type Group struct {
 	storage.BaseModel
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        *string `json:"name" gorm:"not null"`
+	Description *string `json:"description"`
+	City        *string `json:"city" gorm:"not null"`
+	Country     *string `json:"country" gorm:"not null"`
+	Street      *string `json:"street" gorm:"not null"`
 }
 
 type Request struct {
@@ -29,7 +32,7 @@ func (r *Request) SetID(id string) error {
 		slog.Error("group", "set-id", err)
 		return err
 	}
-	r.Group.UUID = v
+	r.Group.UUID = &v
 	return err
 }
 
