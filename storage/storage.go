@@ -12,14 +12,15 @@ import (
 var ErrNotFound = gorm.ErrRecordNotFound
 
 type BaseModel struct {
-	UUID      uuid.UUID      `json:"uuid,omitempty" gorm:"primaryKey"`
-	CreatedAt time.Time      `json:"created_at,omitempty"`
-	UpdatedAt time.Time      `json:"updated_at,omitempty"`
+	UUID      *uuid.UUID     `json:"uuid,omitempty" gorm:"primaryKey"`
+	CreatedAt *time.Time     `json:"created_at,omitempty"`
+	UpdatedAt *time.Time     `json:"updated_at,omitempty"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
-	b.UUID = uuid.New()
+	u := uuid.New()
+	b.UUID = &u
 	return nil
 }
 
