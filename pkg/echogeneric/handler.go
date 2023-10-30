@@ -35,9 +35,8 @@ type GenericServiceHandler struct {
 func (s GenericServiceHandler) Create(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var (
-			err    error
-			status int
-			req    = s.svc.GetRequest()
+			err error
+			req = s.svc.GetRequest()
 		)
 		// try to bing payload
 		if err = ctx.Bind(req); err != nil {
@@ -49,7 +48,7 @@ func (s GenericServiceHandler) Create(context context.Context) echo.HandlerFunc 
 		if err != nil {
 			return ctx.JSON(resp.GetStatusCode(), resp)
 		}
-		return ctx.JSON(status, resp)
+		return ctx.JSON(resp.GetStatusCode(), resp)
 	}
 }
 
@@ -65,7 +64,7 @@ func (s GenericServiceHandler) Get(ctx context.Context) echo.HandlerFunc {
 		if err != nil {
 			return ctx.JSON(resp.GetStatusCode(), resp)
 		}
-		return ctx.JSON(http.StatusOK, resp)
+		return ctx.JSON(resp.GetStatusCode(), resp)
 	}
 }
 
@@ -87,14 +86,14 @@ func (s GenericServiceHandler) Update(ctx context.Context) echo.HandlerFunc {
 		if err != nil {
 			return ctx.JSON(resp.GetStatusCode(), resp)
 		}
-		return ctx.JSON(http.StatusOK, resp)
+		return ctx.JSON(resp.GetStatusCode(), resp)
 	}
 }
 
 func (s GenericServiceHandler) Delete(ctx context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		id := ctx.Param(s.svc.GetID())
-		s.e.Logger.Infof("generic-delete", "param", id)
+		s.e.Logger.Info("generic-delete", "param", id)
 		req := s.svc.GetRequest()
 		if err := req.SetID(id); err != nil {
 			return ctx.JSON(http.StatusInternalServerError, err.Error())
@@ -103,7 +102,7 @@ func (s GenericServiceHandler) Delete(ctx context.Context) echo.HandlerFunc {
 		if err != nil {
 			return ctx.JSON(resp.GetStatusCode(), resp)
 		}
-		return ctx.JSON(http.StatusOK, resp)
+		return ctx.JSON(resp.GetStatusCode(), resp)
 	}
 }
 
