@@ -7,14 +7,15 @@ import (
 
 	"github.com/google/uuid"
 	generic "github.com/josuebrunel/sportdropin/pkg/echogeneric"
+	"github.com/josuebrunel/sportdropin/storage"
 )
 
 var store = []*Group{}
 
 type Group struct {
-	UUID        uuid.UUID `json:"uuid"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	storage.BaseModel
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type Request struct {
@@ -35,7 +36,7 @@ func (r *Request) SetID(id string) error {
 type Response struct {
 	StatusCode int    `json:"status_code"`
 	Error      string `json:"error"`
-	Data       Group  `json:"data,ommitempty"`
+	Data       Group  `json:"data,omitempty"`
 }
 
 func (r Response) GetStatusCode() int {
@@ -43,8 +44,9 @@ func (r Response) GetStatusCode() int {
 }
 
 type Service struct {
-	Name string
-	ID   string
+	Name  string
+	ID    string
+	store storage.Storer
 }
 
 func (s Service) GetName() string {
@@ -63,60 +65,102 @@ func (s Service) GetResponse() generic.IResponse {
 	return Response{}
 }
 
+func (s Service) GetModel() any {
+	return Group{}
+}
+
 func (s Service) Create(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
 	r := req.(*Request)
-	r.UUID = uuid.New()
-	store = append(store, &r.Group)
-	slog.Info("group", "create", r, "store", store)
-	return Response{StatusCode: 200, Data: *store[len(store)-1]}, nil
+	var (
+		err  error
+		resp = Response{
+			StatusCode: 201,
+			Error:      "",
+			Data:       Group{},
+		}
+	)
+	if _, err = s.store.Create(&r.Group); err != nil {
+		slog.Error("error while creating", "group", r.Group, "error", err)
+		resp.Error = err.Error()
+		resp.StatusCode = 500
+	} else {
+		slog.Info("group", "created", r)
+		resp.Data = r.Group
+	}
+	return resp, err
 }
 
 func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
 	r := req.(*Request)
-	slog.Info("group", "get-gen-req", r)
-	for _, g := range store {
-		if g.UUID.String() == r.UUID.String() {
-			slog.Info("group", "get", *g)
-			r := Response{StatusCode: 200, Data: *g}
-			return r, nil
+	var (
+		err  error
+		resp = Response{
+			StatusCode: 200,
+			Error:      "",
+			Data:       Group{},
+		}
+		filter = map[string]any{"uuid": r.UUID.String()}
+	)
+
+	if _, err = s.store.Get(&resp.Data, filter); err != nil {
+		slog.Error("error while getting", "group", r.Group.UUID, "error", err)
+		if errors.Is(err, storage.ErrNotFound) {
+			resp.StatusCode = 404
+			resp.Error = err.Error()
+		} else {
+			resp.StatusCode = 500
+			resp.Error = err.Error()
 		}
 	}
-	err := errors.New("not-found")
-	return Response{StatusCode: 404, Error: err.Error()}, err
+	return resp, err
 }
 
 func (s Service) Update(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
 	r := req.(*Request)
-	for _, g := range store {
-		if g.UUID.String() == r.UUID.String() {
-			slog.Info("group", "update", *g)
-			g.Name = r.Name
-			g.Description = r.Description
-			slog.Info("group", "update", r, "store", store)
-			r := Response{StatusCode: 200, Data: *g}
-			return r, nil
+	var (
+		err  error
+		resp = Response{
+			StatusCode: 202,
+			Error:      "",
+			Data:       r.Group,
+		}
+	)
+
+	if _, err := s.store.Update(&r.Group); err != nil {
+		slog.Error("error while updating", "group", r.Group.UUID, "error", err)
+		if errors.Is(err, storage.ErrNotFound) {
+			resp.StatusCode = 404
+			resp.Error = err.Error()
+		} else {
+			resp.StatusCode = 500
+			resp.Error = err.Error()
 		}
 	}
-	err := errors.New("not-found")
-	return Response{StatusCode: 404, Error: err.Error()}, err
+	return resp, err
 }
 
 func (s Service) Delete(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
-	r := req.(*Request)
-	for i, g := range store {
-		if g.UUID == r.UUID {
-			slog.Info("group", "delete", *g)
-			last := len(store) - 1
-			store[i], store[last] = store[last], store[i]
-			store = store[:last]
+	var (
+		r      = req.(*Request)
+		filter = map[string]any{"uuid": r.UUID.String()}
+		resp   = Response{StatusCode: 204}
+		err    error
+	)
+	if _, err := s.store.Delete(&r.Group, filter); err != nil {
+		slog.Error("error while deleting", "group", r.Group.UUID, "error", err)
+		if errors.Is(err, storage.ErrNotFound) {
+			resp.StatusCode = 404
+			resp.Error = err.Error()
+		} else {
+			resp.StatusCode = 500
+			resp.Error = err.Error()
 		}
 	}
-	slog.Info("group", "delete", r.UUID, "store", store)
-	return Response{StatusCode: 204}, nil
+	return resp, err
 }
 
-func NewService(name, id string) Service {
-	return Service{Name: name, ID: id}
+func NewService(name, id string, store storage.Storer) Service {
+	return Service{Name: name, ID: id, store: store}
 }
 
-// var _ gh.Service = Service{}
+var _ generic.Service = Service{}

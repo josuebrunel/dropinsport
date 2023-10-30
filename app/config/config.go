@@ -1,17 +1,22 @@
 package config
 
 import (
+	"fmt"
 	"os"
-	"strconv"
 )
 
 type Config struct {
 	HTTPAddr string
 	DBHost   string
-	DBPort   int
+	DBPort   string
 	DBUser   string
 	DBPass   string
 	DBName   string
+}
+
+func (cfg Config) GetDBDSN() string {
+	dsn := "host=%s port=%s dbname=%s user='%s' password=%s sslmode=disable"
+	return fmt.Sprintf(dsn, cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBUser, cfg.DBPass)
 }
 
 func getValue(envKey string) string {
@@ -29,11 +34,10 @@ func NewConfig() Config {
 		cfg.HTTPAddr = v
 	}
 	cfg.DBHost = getValue("SDI_DB_HOST")
-	var port = 5432
-	if p, err := strconv.Atoi(getValue("SDI_DB_HOST")); err == nil {
-		port = p
+	cfg.DBPort = "5432"
+	if p := getValue("SDI_DB_PORT"); p != "" {
+		cfg.DBPort = p
 	}
-	cfg.DBPort = port
 	cfg.DBUser = getValue("SDI_DB_USERNAME")
 	cfg.DBPass = getValue("SDI_DB_PASSWORD")
 	cfg.DBName = getValue("SDI_DB_NAME")
