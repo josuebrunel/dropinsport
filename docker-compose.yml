@@ -13,6 +13,8 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
+      networks:
+        - sdi
     sdi:
         container_name: sdi
         tty: true
