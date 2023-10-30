@@ -10,6 +10,7 @@ import (
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
 	generic "github.com/josuebrunel/sportdropin/pkg/echogeneric"
+	"github.com/josuebrunel/sportdropin/user"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -35,6 +36,8 @@ func (a App) Run() {
 
 	groupSVC := group.NewService("group", "uuid")
 	generic.MountService(e, groupSVC)
+	userSVC := user.NewService("user", "uuid")
+	generic.MountService(e, userSVC)
 	// Start server
 	go func() {
 		if err := e.Start(a.Opts.HTTPAddr); err != nil && err != http.ErrServerClosed {
