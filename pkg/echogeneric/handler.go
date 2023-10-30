@@ -8,42 +8,48 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// IRequest represents the interface for request objects.
 type IRequest interface {
-	GetID() string
-	SetID(id string) error
+	GetID() string         // Get the ID from the request.
+	SetID(id string) error // Set the ID for the request.
 }
+
+// IResponse represents the interface for response objects.
 type IResponse interface {
-	GetStatusCode() int
+	GetStatusCode() int // Get the HTTP status code for the response.
 }
 
+// Service is an interface representing a generic service with CRUD operations.
 type Service interface {
-	GetName() string
-	GetID() string
-	GetRequest() IRequest
-	GetResponse() IResponse
-	Create(context.Context, IRequest) (IResponse, error)
-	Get(context.Context, IRequest) (IResponse, error)
-	Update(context.Context, IRequest) (IResponse, error)
-	Delete(context.Context, IRequest) (IResponse, error)
+	GetName() string                                     // Get the service name.
+	GetID() string                                       // Get the ID field name for the service.
+	GetRequest() IRequest                                // Get an instance of the request object.
+	GetResponse() IResponse                              // Get an instance of the response object.
+	Create(context.Context, IRequest) (IResponse, error) // Create a resource.
+	Get(context.Context, IRequest) (IResponse, error)    // Get a resource.
+	Update(context.Context, IRequest) (IResponse, error) // Update a resource.
+	Delete(context.Context, IRequest) (IResponse, error) // Delete a resource.
 }
 
+// GenericServiceHandler is a handler for generic service operations.
 type GenericServiceHandler struct {
 	svc Service
 	e   *echo.Echo
 }
 
+// Create is a handler for the create operation.
 func (s GenericServiceHandler) Create(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var (
 			err error
 			req = s.svc.GetRequest()
 		)
-		// try to bing payload
+		// Try to bind payload.
 		if err = ctx.Bind(req); err != nil {
-			s.e.Logger.Error("failed to bind payalod for %s", s.svc.GetName())
+			s.e.Logger.Error("failed to bind payload for %s", s.svc.GetName())
 			return ctx.JSON(http.StatusBadRequest, err.Error())
 		}
-		// let the target service process the request
+		// Let the target service process the request.
 		resp, err := s.svc.Create(context, req)
 		if err != nil {
 			return ctx.JSON(resp.GetStatusCode(), resp)
@@ -52,6 +58,7 @@ func (s GenericServiceHandler) Create(context context.Context) echo.HandlerFunc 
 	}
 }
 
+// Get is a handler for the get operation.
 func (s GenericServiceHandler) Get(ctx context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		id := ctx.Param(s.svc.GetID())
@@ -68,17 +75,18 @@ func (s GenericServiceHandler) Get(ctx context.Context) echo.HandlerFunc {
 	}
 }
 
+// Update is a handler for the update operation.
 func (s GenericServiceHandler) Update(ctx context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var err error
 		req := s.svc.GetRequest()
-		// try to bing payload
+		// Try to bind payload.
 		if err = ctx.Bind(req); err != nil {
-			s.e.Logger.Error("failed to bind payalod for %s", s.svc.GetName())
+			s.e.Logger.Error("failed to bind payload for %s", s.svc.GetName())
 			return ctx.JSON(http.StatusBadRequest, err.Error())
 		}
 		id := ctx.Param(s.svc.GetID())
-		s.e.Logger.Infof("generic-update", "param", id)
+		s.e.Logger.Info("generic-update", "param", id)
 		if err = req.SetID(id); err != nil {
 			return ctx.JSON(http.StatusInternalServerError, err.Error())
 		}
@@ -90,6 +98,7 @@ func (s GenericServiceHandler) Update(ctx context.Context) echo.HandlerFunc {
 	}
 }
 
+// Delete is a handler for the delete operation.
 func (s GenericServiceHandler) Delete(ctx context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		id := ctx.Param(s.svc.GetID())
@@ -106,6 +115,7 @@ func (s GenericServiceHandler) Delete(ctx context.Context) echo.HandlerFunc {
 	}
 }
 
+// GetPathParamName returns the path parameter name used for routing.
 func (s GenericServiceHandler) GetPathParamName() string {
 	var sb strings.Builder
 	sb.WriteString("/:")
@@ -114,6 +124,7 @@ func (s GenericServiceHandler) GetPathParamName() string {
 	return sb.String()
 }
 
+// MountService creates and mounts a GenericServiceHandler for the provided service on the given Echo instance.
 func MountService(e *echo.Echo, svc Service) GenericServiceHandler {
 	ctx := context.Background()
 	h := GenericServiceHandler{svc: svc, e: e}
