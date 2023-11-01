@@ -125,7 +125,7 @@ func (s GenericServiceHandler) GetPathParamName() string {
 }
 
 // MountService creates and mounts a GenericServiceHandler for the provided service on the given Echo instance.
-func MountService(e *echo.Echo, svc Service) GenericServiceHandler {
+func MountService(e *echo.Echo, svc Service) {
 	ctx := context.Background()
 	h := GenericServiceHandler{svc: svc, e: e}
 	g := h.e.Group(svc.GetName())
@@ -134,5 +134,4 @@ func MountService(e *echo.Echo, svc Service) GenericServiceHandler {
 	g.GET(paramPath, h.Get(ctx))
 	g.PATCH(paramPath, h.Update(ctx))
 	g.DELETE(paramPath, h.Delete(ctx))
-	return h
 }
