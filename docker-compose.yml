@@ -15,12 +15,13 @@ services:
         retries: 5
       networks:
         - sdi
-    sdi:
-        container_name: sdi
+    dev:
+        container_name: sdi-dev
         tty: true
         build:
             context: .
             dockerfile: Dockerfile
+            target: build
         env_file:
           - env
         ports:
@@ -30,6 +31,24 @@ services:
             condition: service_healthy
         networks:
           - sdi
+        volumes:
+          - ./:/go/src/app/
+    sdi:
+      container_name: sdi
+      tty: true
+      build:
+          context: .
+          dockerfile: Dockerfile
+      env_file:
+        - env
+      ports:
+          - "8999:8080"
+      depends_on:
+        db:
+          condition: service_healthy
+      networks:
+        - sdi
+    
 
 networks:
   sdi:
