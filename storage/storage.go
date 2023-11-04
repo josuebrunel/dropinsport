@@ -27,6 +27,7 @@ func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
 type Storer interface {
 	Create(any) (int64, error)
 	Get(any, map[string]any) (int64, error)
+	List(any, map[string]any) (int64, error)
 	Update(any) (int64, error)
 	Delete(any, map[string]any) (int64, error)
 }
@@ -54,6 +55,11 @@ func (s Store) Create(m any) (int64, error) {
 
 func (s Store) Get(m any, filter map[string]any) (int64, error) {
 	result := s.db.Where(filter).First(m)
+	return result.RowsAffected, result.Error
+}
+
+func (s Store) List(m any, filter map[string]any) (int64, error) {
+	result := s.db.Where(filter).Find(m)
 	return result.RowsAffected, result.Error
 }
 
