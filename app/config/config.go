@@ -12,6 +12,7 @@ type Config struct {
 	DBUser   string
 	DBPass   string
 	DBName   string
+	TPLPath  string
 }
 
 func (cfg Config) GetDBDSN() string {
@@ -41,5 +42,6 @@ func NewConfig() Config {
 	cfg.DBUser = getValue("SDI_DB_USERNAME")
 	cfg.DBPass = getValue("SDI_DB_PASSWORD")
 	cfg.DBName = getValue("SDI_DB_NAME")
+	cfg.TPLPath = getValue("SDI_TEMPLATES_PATH")
 	return cfg
 }
