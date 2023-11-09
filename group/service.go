@@ -10,17 +10,6 @@ import (
 	"github.com/josuebrunel/sportdropin/storage"
 )
 
-var store = []*Group{}
-
-type Group struct {
-	storage.BaseModel
-	Name        *string `json:"name" gorm:"not null"`
-	Description *string `json:"description"`
-	City        *string `json:"city" gorm:"not null"`
-	Country     *string `json:"country" gorm:"not null"`
-	Street      *string `json:"street" gorm:"not null"`
-}
-
 type Request struct {
 	Group
 }
