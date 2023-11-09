@@ -39,7 +39,7 @@ func (r *Request) SetID(id string) error {
 type Response struct {
 	StatusCode int    `json:"status_code"`
 	Error      string `json:"error"`
-	Data       Group  `json:"data,omitempty"`
+	Data       any    `json:"data,omitempty"`
 }
 
 func (r Response) GetStatusCode() int {
@@ -116,6 +116,26 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 		}
 	}
 	return resp, err
+}
+
+func (s Service) List(ctx context.Context) (generic.IResponse, error) {
+	var (
+		err    error
+		groups []Group
+		resp   = Response{
+			StatusCode: 200,
+			Error:      "",
+			Data:       groups,
+		}
+		filter = map[string]any{}
+	)
+
+	if _, err = s.store.List(&resp.Data, filter); err != nil {
+		resp.StatusCode = 500
+		resp.Error = err.Error()
+	}
+	return resp, err
+
 }
 
 func (s Service) Update(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
