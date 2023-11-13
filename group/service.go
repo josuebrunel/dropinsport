@@ -86,15 +86,16 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 	r := req.(*Request)
 	var (
 		err  error
+		g    = Group{}
 		resp = Response{
 			StatusCode: 200,
 			Error:      "",
-			Data:       Group{},
+			Data:       &g,
 		}
-		filter = map[string]any{"uuid": r.UUID.String()}
+		filter = map[string]any{"uuid": r.GetID()}
 	)
 
-	if _, err = s.store.Get(&resp.Data, filter); err != nil {
+	if _, err = s.store.Get(&g, filter); err != nil {
 		slog.Error("error while getting", "group", r.Group.UUID, "error", err)
 		if errors.Is(err, storage.ErrNotFound) {
 			resp.StatusCode = 404
@@ -104,6 +105,7 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 			resp.Error = err.Error()
 		}
 	}
+	slog.Info("storage", "get-group", resp.Data)
 	return resp, err
 }
 
