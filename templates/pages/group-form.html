@@ -10,15 +10,14 @@
     <input type="text" name="name" id="name" value="{{ .Name }}">
     <label for="description">Description</label>
     <textarea name="description" id="description" cols="30" rows="10">{{ .Description }}</textarea>
+    <label for="street">Street</label>
+    <input type="text" name="street" id="street" value="{{ .Street }}">
     <div class="grid">
-        <label for="street">Street</label>
-        <input type="text" name="street" id="street" value="{{ .Street }}">
         <label for="city">City</label><input type="text" name="city" id="city" value="{{ .City }}">
         <label for="country">Country</label><input type="text" name="country" id="country" value="{{ .Country }}">
     </div>
     <span class="grid">
         <button type="submit" value="save" class="primary">Save</button>
-        <button type="reset">Reset</button>
         <button type="submit" value="delete" class="secondary" data-target="delete-modal"
             onClick="toggleModal(event)">Delete</button>
     </span>
