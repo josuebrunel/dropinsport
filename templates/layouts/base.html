@@ -1,0 +1,27 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block "title" .}} Sportdropin {{end}}</title>
+    {{ template "styles" .}}
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/"><strong>Sportdropin</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="#">Link</a></li>
+            <li><a href="#">Link</a></li>
+            <li><a href="#" role="button">Button</a></li>
+        </ul>
+    </nav>
+    <main class="container">
+        {{ block "content" .}} {{ end}}
+    </main>
+    {{ template "scripts" .}}
+</body>
+
+</html>
