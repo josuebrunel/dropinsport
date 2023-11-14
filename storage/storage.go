@@ -12,7 +12,7 @@ import (
 var ErrNotFound = gorm.ErrRecordNotFound
 
 type BaseModel struct {
-	UUID      *uuid.UUID     `json:"uuid,omitempty" gorm:"primaryKey"`
+	UUID      *uuid.UUID     `json:"uuid,omitempty"`
 	CreatedAt *time.Time     `json:"created_at,omitempty"`
 	UpdatedAt *time.Time     `json:"updated_at,omitempty"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
@@ -37,10 +37,10 @@ type Store struct {
 	db  *gorm.DB
 }
 
-func NewStore(dsn string) (Store, error) {
+func NewStore(dsn string) (*Store, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	s := Store{DSN: dsn, db: db}
-	return s, err
+	return &s, err
 }
 
 func (s Store) RunMigrations(models ...any) error {
@@ -50,25 +50,40 @@ func (s Store) RunMigrations(models ...any) error {
 
 func (s Store) Create(m any) (int64, error) {
 	result := s.db.Create(m)
+	if result.Error != nil {
+		slog.Error("storage", "error", result.Error)
+	}
 	return result.RowsAffected, result.Error
 }
 
 func (s Store) Get(m any, filter map[string]any) (int64, error) {
 	result := s.db.Where(filter).First(m)
+	if result.Error != nil {
+		slog.Error("storage", "error", result.Error)
+	}
 	return result.RowsAffected, result.Error
 }
 
 func (s Store) List(m any, filter map[string]any) (int64, error) {
 	result := s.db.Where(filter).Find(m)
+	if result.Error != nil {
+		slog.Error("storage", "error", result.Error)
+	}
 	return result.RowsAffected, result.Error
 }
 
 func (s Store) Update(m any) (int64, error) {
 	result := s.db.Model(m).Updates(m)
+	if result.Error != nil {
+		slog.Error("storage", "error", result.Error)
+	}
 	return result.RowsAffected, result.Error
 }
 
 func (s Store) Delete(m any, filter map[string]any) (int64, error) {
 	result := s.db.Where(filter).Delete(m)
+	if result.Error != nil {
+		slog.Error("storage", "error", result.Error)
+	}
 	return result.RowsAffected, result.Error
 }
