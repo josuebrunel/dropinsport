@@ -11,8 +11,8 @@ import (
 
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
-	"github.com/josuebrunel/sportdropin/pkg/templatemap"
 	"github.com/josuebrunel/sportdropin/storage"
+	"github.com/josuebrunel/templatesmap"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -27,7 +27,7 @@ func NewApp() App {
 }
 
 type TemplateMapWrapper struct {
-	templateMap *templatemap.TemplateMap
+	templateMap *templatesmap.TemplatesMap
 }
 
 func (t TemplateMapWrapper) Render(wr io.Writer, name string, data any, ctx echo.Context) error {
@@ -50,7 +50,7 @@ func (a App) Run() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS())
 
-	tpl, err := templatemap.NewTemplateMap("templates/layouts/*.html", "templates/pages/*.html")
+	tpl, err := templatesmap.NewTemplatesMap("templates/layouts/*.html", "templates/pages/*.html")
 	if err != nil {
 		slog.Error("templatemap", "error", err)
 		return
