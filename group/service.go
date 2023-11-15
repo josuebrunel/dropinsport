@@ -109,7 +109,7 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 	return resp, err
 }
 
-func (s Service) List(ctx context.Context) (generic.IResponse, error) {
+func (s Service) List(ctx context.Context, filters map[string]any) (generic.IResponse, error) {
 	var (
 		err    error
 		groups []Group
@@ -118,10 +118,9 @@ func (s Service) List(ctx context.Context) (generic.IResponse, error) {
 			Error:      "",
 			Data:       groups,
 		}
-		filter = map[string]any{}
 	)
 
-	if _, err = s.store.List(&resp.Data, filter); err != nil {
+	if _, err = s.store.List(&resp.Data, filters); err != nil {
 		resp.StatusCode = 500
 		resp.Error = err.Error()
 	}

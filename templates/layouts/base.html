@@ -16,16 +16,16 @@
         </ul>
         <ul>
             <li>
-                <form class="grid" action="/">
+                <form class="grid" hx-get="/" hx-trigger="click" hx-target="#container" >
                     <span class="grid">
                         <input type="text" name="search" id="search" placeholder="Search">
-                        <button type="submit">Search</button>
+                        <button type="submit" >Search</button>
                     </span>
                 </form>
 
         </ul>
     </nav>
-    <main class="container">
+    <main class="container" id="container">
         {{ block "content" .}} {{ end}}
     </main>
     {{ template "scripts" .}}

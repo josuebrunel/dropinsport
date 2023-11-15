@@ -1,0 +1,20 @@
+{{ range .Data }}
+<article>
+    <header>
+        <div><a href="/group/{{.UUID}}">{{ .Name }}</a></div>
+    </header>
+    <div>
+        <p> {{ .Description }}</p>
+    </div>
+    <footer>
+        <small>
+            <span>{{ .Street }}</span>
+            <span>{{ .City }}</span>
+            <span>{{ .Country }}</span>
+        </small>
+    </footer>
+</article>
+{{ end }}
+
+<a href="/group/" role="button">Add a group</a>
+

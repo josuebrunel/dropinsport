@@ -87,11 +87,20 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 
 func (h GroupHandler) List(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		resp, err := h.svc.List(context)
+		var filters = make(map[string]any)
+		if city := ctx.QueryParam("search"); city != "" {
+			filters["city"] = city
+		}
+
+		var tpl = "group-list.html"
+		if ctx.Request().Header.Get("Hx-Request") == "true" {
+			tpl = "group-hx-list.html"
+		}
+		resp, err := h.svc.List(context, filters)
 		if err != nil {
 			return ctx.Render(resp.GetStatusCode(), "error.html", NewErrorResponse(err))
 		}
-		return ctx.Render(resp.GetStatusCode(), "group-list.html", resp)
+		return ctx.Render(resp.GetStatusCode(), tpl, resp)
 	}
 }
 
