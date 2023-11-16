@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,7 +11,6 @@ import (
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
 	"github.com/josuebrunel/sportdropin/storage"
-	"github.com/josuebrunel/templatesmap"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -24,17 +22,6 @@ type App struct {
 func NewApp() App {
 	opts := config.NewConfig()
 	return App{Opts: opts}
-}
-
-type TemplateMapWrapper struct {
-	templateMap *templatesmap.TemplatesMap
-}
-
-func (t TemplateMapWrapper) Render(wr io.Writer, name string, data any, ctx echo.Context) error {
-	if viewContext, isMap := data.(map[string]interface{}); isMap {
-		viewContext["reverse"] = ctx.Echo().Reverse
-	}
-	return t.templateMap.Render(wr, name, data)
 }
 
 func (a App) Run() {
@@ -50,12 +37,10 @@ func (a App) Run() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS())
 
-	tpl, err := templatesmap.NewTemplatesMap("templates/layouts/*.html", "templates/pages/*.html")
+	renderer, err := NewTemplateRenderer("templates/layouts/*.html", "templates/pages/*.html")
 	if err != nil {
-		slog.Error("templatemap", "error", err)
 		return
 	}
-	renderer := TemplateMapWrapper{templateMap: tpl}
 	e.Renderer = renderer
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	// Mount handlers
@@ -68,7 +53,8 @@ func (a App) Run() {
 	e.POST("/group/", groupHandler.Create(ctx))
 	e.GET("/group/", groupHandler.Get(ctx))
 	e.GET("/group/:uuid/", groupHandler.Get(ctx))
-	e.GET("/group/:uuid/delete/", groupHandler.Delete(ctx))
+	e.PATCH("/group/:uuid/", groupHandler.Update(ctx))
+	e.DELETE("/group/:uuid/", groupHandler.Delete(ctx))
 
 	// Migrate models
 	models := []any{groupSVC.GetModel()}

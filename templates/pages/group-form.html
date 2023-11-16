@@ -2,7 +2,8 @@
 {{ define "title" }} Add group {{ end }}
 
 {{ define "content" }}
-{{ with .Data }}
+{{ $url := .url }}
+{{ with .data.Data }}
 <form method="post" action="/group/">
     <label for="sport">Sport</label>
     <input type="text" name="sport" id="sport" value="{{ .Sport }}">
@@ -33,7 +34,7 @@
                     onClick="toggleModal(event)">
                     Cancel
                 </a>
-                <a href="/group/{{.UUID}}/delete/" role="button" data-target="delete-modal" onClick="redirect(event)">
+                <a href="{{ $url }}" role="button" data-target="delete-modal" onClick="redirect(event)">
                     Confirm
                 </a>
             </footer>
