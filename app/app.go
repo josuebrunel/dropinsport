@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/josuebrunel/sportdropin/app/config"
@@ -37,7 +38,8 @@ func (a App) Run() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS())
 
-	renderer, err := NewTemplateRenderer("templates/layouts/*.html", "templates/pages/*.html")
+	tplPatterns := strings.Split(a.Opts.TPLPath, ";")
+	renderer, err := NewTemplateRenderer(tplPatterns[0], tplPatterns[1:]...)
 	if err != nil {
 		return
 	}
