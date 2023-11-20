@@ -30,8 +30,8 @@ func NewTemplateRenderer(layouts string, pages ...string) (*TemplateRenderer, er
 type TemplateContext map[string]any
 
 func (tc TemplateContext) IsHXRequest() bool {
-	req := tc["request"].(http.Request)
-	val := req.Header.Get("Hx-Request")
+	req := tc["request"].(*http.Request)
+	val := req.Header.Get("HX-Request")
 	return val != ""
 }
 

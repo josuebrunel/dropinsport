@@ -1,7 +1,7 @@
 {{ template "base.html" .}}
-{{ define "title" }} Group - {{.Data.Name}} {{ end }}
+{{ define "title" }} Group - {{.data.Data.Name}} {{ end }}
 {{ define "content" }}
-{{ with .Data }}
+{{ with .data.Data }}
 <article>
     <header>
         <div><a href="/group/{{.UUID}}">{{ .Name }}</a></div>

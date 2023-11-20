@@ -2,13 +2,14 @@ package group
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/josuebrunel/sportdropin/storage"
 	"github.com/labstack/echo/v4"
 )
+
+const hx_trigger_group = "groupChange"
 
 type ErrorResponse struct {
 	Error string
@@ -40,10 +41,10 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return ctx.Render(resp.GetStatusCode(), "error.html", NewErrorResponse(err))
 		}
-		r := resp.(Response)
-		g := r.Data.(Group)
-		return ctx.Redirect(http.StatusFound, fmt.Sprintf("/group/%s/", g.UUID))
+		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
+		return ctx.Render(resp.GetStatusCode(), "group-detail.html", resp)
 	}
+
 }
 
 func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
@@ -81,6 +82,7 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return ctx.Render(resp.GetStatusCode(), "error.html", NewErrorResponse(err))
 		}
+		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
 		return ctx.Render(resp.GetStatusCode(), "group-form.html", resp)
 	}
 }
@@ -91,16 +93,11 @@ func (h GroupHandler) List(context context.Context) echo.HandlerFunc {
 		if city := ctx.QueryParam("search"); city != "" {
 			filters["city"] = city
 		}
-
-		var tpl = "group-list.html"
-		if ctx.Request().Header.Get("Hx-Request") == "true" {
-			tpl = "group-hx-list.html"
-		}
 		resp, err := h.svc.List(context, filters)
 		if err != nil {
 			return ctx.Render(resp.GetStatusCode(), "error.html", NewErrorResponse(err))
 		}
-		return ctx.Render(resp.GetStatusCode(), tpl, resp)
+		return ctx.Render(resp.GetStatusCode(), "group-list.html", resp)
 	}
 }
 
@@ -115,6 +112,7 @@ func (h GroupHandler) Delete(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return ctx.Render(resp.GetStatusCode(), "error.html", NewErrorResponse(err))
 		}
-		return ctx.Redirect(http.StatusFound, "/")
+		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
+		return ctx.Render(resp.GetStatusCode(), "group-list.html", nil)
 	}
 }
