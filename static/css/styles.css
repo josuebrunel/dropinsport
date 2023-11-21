@@ -1,3 +1,7 @@
 #brand-logo {
     height: 25%;
 }
+
+.error {
+    color: red;
+}

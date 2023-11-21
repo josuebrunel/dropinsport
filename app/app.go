@@ -50,7 +50,7 @@ func (a App) Run() {
 
 	groupHandler := group.NewGroupHandler(store)
 
-	e.Static("/static/", "static")
+	e.Static("/static", "static")
 	e.GET("/", groupHandler.List(ctx))
 	e.POST("/group/", groupHandler.Create(ctx))
 	e.GET("/group/", groupHandler.Get(ctx))

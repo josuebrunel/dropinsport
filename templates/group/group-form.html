@@ -11,6 +11,7 @@
 {{ define "content" }}
     {{ $hxreq := .IsHXRequest }}
     {{ $url := .url }}
+    {{ $errors := .data.Errors }}
     {{ with .data.Data }}
     <dialog id="group-modal" open>
         <article>
@@ -19,17 +20,30 @@
                 {{ template "title" . }}
             </header>
             <form method="post" id="group-form">
-                <label>Sport</label>
-                <input type="text" name="sport" id="sport" value="{{ .Sport }}">
-                <label for="name">Name</label>
-                <input type="text" name="name" id="name" value="{{ .Name }}">
-                <label for="description">Description</label>
-                <textarea name="description" id="description" cols="30" rows="10">{{ .Description }}</textarea>
-                <label for="street">Street</label>
-                <input type="text" name="street" id="street" value="{{ .Street }}">
+                <div>
+                    <label>Sport</label>
+                    <input type="text" name="sport" id="sport" value="{{ .Sport }}">
+                    {{ if $errors.sport }}<p class="error"><small><em>{{ $errors.sport }}</em></small></p>{{ end }}
+                </div>
+                <div>
+                    <label for="name">Name</label>
+                    <input type="text" name="name" id="name" value="{{ .Name }}">
+                    {{ if $errors.name }}<p class="error"><small><em>{{ $errors.name }}</em></small></p>{{ end }}
+                </div>
+                <div>
+                    <label for="description">Description</label>
+                    <textarea name="description" id="description" cols="30" rows="10">{{ .Description }}</textarea>
+                </div>
+                <div>
+                    <label for="street">Street</label>
+                    <input type="text" name="street" id="street" value="{{ .Street }}">
+                    {{ if $errors.street }}<p class="error"><small><em>{{ $errors.street }}</em></small></p>{{ end }}
+                </div>
                 <div class="grid">
                     <label for="city">City</label><input type="text" name="city" id="city" value="{{ .City }}">
+                    {{ if $errors.city }}<p class="error"><small><em>{{ $errors.city }}</em></small></p>{{ end }}
                     <label for="country">Country</label><input type="text" name="country" id="country" value="{{ .Country }}">
+                    {{ if $errors.country }}<p class="error"><small><em>{{ $errors.country }}</em></small></p>{{ end }}
                 </div>
                 <span class="grid">
                     <button type="submit" value="save" class="primary" {{ template "hxmethod" . }}="{{ $url }}" hx-target="#group-modal" hx-swap="delete">Save</button>

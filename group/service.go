@@ -7,11 +7,39 @@ import (
 
 	"github.com/google/uuid"
 	generic "github.com/josuebrunel/sportdropin/pkg/echogeneric"
+	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
 	"github.com/josuebrunel/sportdropin/storage"
 )
 
+func isStrNil(s *string) bool {
+	if s == nil || *s == "" {
+		return true
+	}
+	return false
+}
+
 type Request struct {
 	Group
+}
+
+func (r Request) Valid() errorsmap.EMap {
+	var em = errorsmap.New()
+	if isStrNil(r.Group.Name) {
+		em["name"] = errors.New("<name> is required")
+	}
+	if isStrNil(r.Group.Sport) {
+		em["sport"] = errors.New("<sport> is required")
+	}
+	if isStrNil(r.Group.Street) {
+		em["street"] = errors.New("<street> is required")
+	}
+	if isStrNil(r.Group.City) {
+		em["city"] = errors.New("<city> is required")
+	}
+	if isStrNil(r.Group.Country) {
+		em["country"] = errors.New("<country> is required")
+	}
+	return em
 }
 
 func (r Request) GetID() string { return r.UUID.String() }
@@ -26,9 +54,9 @@ func (r *Request) SetID(id string) error {
 }
 
 type Response struct {
-	StatusCode int    `json:"status_code"`
-	Error      string `json:"error"`
-	Data       any    `json:"data,omitempty"`
+	StatusCode int            `json:"status_code"`
+	Errors     errorsmap.EMap `json:"errors"`
+	Data       any            `json:"data,omitempty"`
 }
 
 func (r Response) GetStatusCode() int {
@@ -67,13 +95,19 @@ func (s Service) Create(ctx context.Context, req generic.IRequest) (generic.IRes
 		err  error
 		resp = Response{
 			StatusCode: 201,
-			Error:      "",
+			Errors:     errorsmap.New(),
 			Data:       Group{},
 		}
 	)
+	if em := r.Valid(); !em.Nil() {
+		slog.Error("error while validating request", "group", r.Group, "errors", em)
+		resp.Errors = em
+		resp.StatusCode = 400
+		return resp, em
+	}
 	if _, err = s.store.Create(&r.Group); err != nil {
 		slog.Error("error while creating", "group", r.Group, "error", err)
-		resp.Error = err.Error()
+		resp.Errors["error"] = err
 		resp.StatusCode = 500
 	} else {
 		slog.Info("group", "created", r)
@@ -89,7 +123,7 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 		g    = Group{}
 		resp = Response{
 			StatusCode: 200,
-			Error:      "",
+			Errors:     errorsmap.New(),
 			Data:       &g,
 		}
 		filter = map[string]any{"uuid": r.GetID()}
@@ -99,10 +133,10 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 		slog.Error("error while getting", "group", r.Group.UUID, "error", err)
 		if errors.Is(err, storage.ErrNotFound) {
 			resp.StatusCode = 404
-			resp.Error = err.Error()
+			resp.Errors["error"] = err
 		} else {
 			resp.StatusCode = 500
-			resp.Error = err.Error()
+			resp.Errors["error"] = err
 		}
 	}
 	slog.Info("storage", "get-group", resp.Data)
@@ -115,14 +149,14 @@ func (s Service) List(ctx context.Context, filters map[string]any) (generic.IRes
 		groups []Group
 		resp   = Response{
 			StatusCode: 200,
-			Error:      "",
+			Errors:     errorsmap.New(),
 			Data:       groups,
 		}
 	)
 
 	if _, err = s.store.List(&resp.Data, filters); err != nil {
 		resp.StatusCode = 500
-		resp.Error = err.Error()
+		resp.Errors["error"] = err
 	}
 	return resp, err
 
@@ -134,7 +168,7 @@ func (s Service) Update(ctx context.Context, req generic.IRequest) (generic.IRes
 		err  error
 		resp = Response{
 			StatusCode: 202,
-			Error:      "",
+			Errors:     errorsmap.New(),
 			Data:       r.Group,
 		}
 	)
@@ -143,10 +177,10 @@ func (s Service) Update(ctx context.Context, req generic.IRequest) (generic.IRes
 		slog.Error("error while updating", "group", r.Group.UUID, "error", err)
 		if errors.Is(err, storage.ErrNotFound) {
 			resp.StatusCode = 404
-			resp.Error = err.Error()
+			resp.Errors["error"] = err
 		} else {
 			resp.StatusCode = 500
-			resp.Error = err.Error()
+			resp.Errors["error"] = err
 		}
 	}
 	return resp, err
@@ -163,10 +197,10 @@ func (s Service) Delete(ctx context.Context, req generic.IRequest) (generic.IRes
 		slog.Error("error while deleting", "group", r.Group.UUID, "error", err)
 		if errors.Is(err, storage.ErrNotFound) {
 			resp.StatusCode = 404
-			resp.Error = err.Error()
+			resp.Errors["error"] = err
 		} else {
 			resp.StatusCode = 500
-			resp.Error = err.Error()
+			resp.Errors["error"] = err
 		}
 	}
 	return resp, err
