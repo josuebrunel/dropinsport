@@ -8,26 +8,22 @@
 
 {{ define "content" }}
 <div id="groups" hx-get="/" hx-trigger="groupChange from:body" hx-target="this">
-        {{ range .data.Data }}
-        <article>
-            <header>
+    {{ range .data.Data }}
+    <article>
+        <hgroup>
+            <h4>
                 {{ $url := print "/group/" .UUID }}
-                <div><a href="{{ $url }}" hx-get="{{ $url }}" hx-target="#groups" hx-swap="beforeend">{{ .Name }}</a></div>
-            </header>
-            <div>
-                <p> {{ .Description }}</p>
-            </div>
-            <footer>
-                <small>
-                    <span>{{ .Street }}</span>
-                    <span>{{ .City }}</span>
-                    <span>{{ .Country }}</span>
-                </small>
-            </footer>
-        </article>
-        {{ else }}
-        <p>No group found</p>
-        {{ end }}
-        <a href="/group/" hx-get="/group" hx-target="#groups" hx-swap="beforeend" role="button">Add a group</a>
-    </div>
+                <a href="{{ $url }}" hx-get="{{ $url }}" hx-target="#groups" hx-swap="beforeend">{{ .Name }}</a>
+            </h4>
+            <small><em>{{ .Street }}, {{ .City }}, {{ .Country }}</em></small>
+            <hr />
+        </hgroup>
+        <p>{{ .Description }}</p>
+
+    </article>
+    {{ else }}
+    <p>No group found</p>
+    {{ end }}
+    <a href="/group/" hx-get="/group" hx-target="#groups" hx-swap="beforeend" role="button">Add a group</a>
+</div>
 {{ end }}
