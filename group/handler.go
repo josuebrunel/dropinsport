@@ -34,12 +34,15 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 			req = h.svc.GetRequest()
 		)
 		if err = ctx.Bind(req); err != nil {
-			return ctx.Render(http.StatusBadRequest, "error.html", NewErrorResponse(err))
+			return ctx.Render(http.StatusOK, "group-form.html", NewErrorResponse(err))
 		}
 
 		resp, err := h.svc.Create(context, req)
 		if err != nil {
-			return ctx.Render(resp.GetStatusCode(), "error.html", NewErrorResponse(err))
+			slog.Info("group-handler-create", "errors", err)
+			ctx.Response().Header().Set("HX-Retarget", "#group-modal")
+			ctx.Response().Header().Set("HX-Reswap", "outerHTML")
+			return ctx.Render(http.StatusOK, "group-form.html", resp)
 		}
 		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
 		return ctx.Render(resp.GetStatusCode(), "group-detail.html", resp)
