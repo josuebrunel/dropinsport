@@ -7,25 +7,31 @@
     {{ template "styles" .}}
 </head>
 
-<body>
-    <nav>
-        <ul>
-            <li>
-                <a href="/"> <strong>SPORTDROPINS</strong></a>
-            </li>
-        </ul>
-        <ul>
-            <li>
-                <form role="search" hx-get="/" hx-trigger="click" hx-target="#container">
-                    <input type="search" name="search" id="search" placeholder="Search">
-                    <input type="submit" value="Search" />
-                </form>
-        </ul>
-    </nav>
+<body class="container">
+    <header class="container">
+        <nav>
+            <ul>
+                <li>
+                    <h2><a href="/"><strong>SPORTDROPINS</strong></a></h2>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <form role="search" hx-get="/" hx-trigger="click" hx-target="#container">
+                        <input type="search" name="search" id="search" placeholder="Search">
+                        <input type="submit" value="Search" />
+                    </form>
+                </li>
+            </ul>
+        </nav>
+        <hr/>
+    </header>
     <main class="container" id="container">
         {{ block "content" .}} {{ end}}
     </main>
     {{ template "scripts" .}}
+    <footer>
+    </footer>
 </body>
 
 </html>
