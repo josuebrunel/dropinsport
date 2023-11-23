@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
 	"github.com/josuebrunel/sportdropin/storage"
@@ -39,7 +40,7 @@ func (a App) Run() {
 	e.Use(middleware.CORS())
 
 	tplPatterns := strings.Split(a.Opts.TPLPath, ";")
-	renderer, err := NewTemplateRenderer(tplPatterns[0], tplPatterns[1:]...)
+	renderer, err := NewTemplateRenderer(tplPatterns[0], sprig.FuncMap(), tplPatterns[1:]...)
 	if err != nil {
 		return
 	}
