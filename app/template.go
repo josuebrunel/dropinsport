@@ -1,6 +1,7 @@
 package app
 
 import (
+	"html/template"
 	"io"
 	"log/slog"
 	"net/http"
@@ -18,8 +19,8 @@ func (t TemplateRenderer) Render(wr io.Writer, name string, data any, ctx echo.C
 	return t.templateMap.Render(wr, name, context)
 }
 
-func NewTemplateRenderer(layouts string, pages ...string) (*TemplateRenderer, error) {
-	tpl, err := templatesmap.NewTemplatesMap(layouts, pages...)
+func NewTemplateRenderer(layouts string, funcs template.FuncMap, pages ...string) (*TemplateRenderer, error) {
+	tpl, err := templatesmap.NewTemplatesMap(layouts, funcs, pages...)
 	if err != nil {
 		slog.Error("templatemap", "error", err)
 		return nil, err
