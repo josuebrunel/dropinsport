@@ -8,6 +8,7 @@ import (
 
 	"github.com/josuebrunel/templatesmap"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type TemplateRenderer struct {
@@ -42,5 +43,6 @@ func NewTemplateContext(ctx echo.Context, data any) TemplateContext {
 	tc["url"] = ctx.Request().URL.String()
 	tc["reverse"] = ctx.Echo().Reverse
 	tc["data"] = data
+	tc["csrf"] = ctx.Get(middleware.DefaultCSRFConfig.ContextKey).(string)
 	return tc
 }

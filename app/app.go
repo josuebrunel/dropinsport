@@ -37,6 +37,9 @@ func (a App) Run() {
 	e := echo.New()
 	e.Pre(middleware.AddTrailingSlash())
 	e.Use(middleware.Logger())
+	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		TokenLookup: "form:csrf",
+	}))
 	e.Use(middleware.CORS())
 
 	tplPatterns := strings.Split(a.Opts.TPLPath, ";")
