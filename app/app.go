@@ -38,7 +38,7 @@ func (a App) Run() {
 	e.Pre(middleware.AddTrailingSlash())
 	e.Use(middleware.Logger())
 	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-		TokenLookup: "form:csrf",
+		TokenLookup: "form:csrf,header:csrf",
 	}))
 	e.Use(middleware.CORS())
 	e.Use(middleware.Recover())
