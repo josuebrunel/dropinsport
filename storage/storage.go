@@ -1,10 +1,10 @@
 package storage
 
 import (
-	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -44,14 +44,14 @@ func NewStore(dsn string) (*Store, error) {
 }
 
 func (s Store) RunMigrations(models ...any) error {
-	slog.Info("running db migrations", "models", models)
+	xlog.Info("running db migrations", "models", models)
 	return s.db.AutoMigrate(models...)
 }
 
 func (s Store) Create(m any) (int64, error) {
 	result := s.db.Create(m)
 	if result.Error != nil {
-		slog.Error("storage", "error", result.Error)
+		xlog.Error("storage", "error", result.Error)
 	}
 	return result.RowsAffected, result.Error
 }
@@ -59,7 +59,7 @@ func (s Store) Create(m any) (int64, error) {
 func (s Store) Get(m any, filter map[string]any) (int64, error) {
 	result := s.db.Where(filter).First(m)
 	if result.Error != nil {
-		slog.Error("storage", "error", result.Error)
+		xlog.Error("storage", "error", result.Error)
 	}
 	return result.RowsAffected, result.Error
 }
@@ -67,7 +67,7 @@ func (s Store) Get(m any, filter map[string]any) (int64, error) {
 func (s Store) List(m any, filter map[string]any) (int64, error) {
 	result := s.db.Where(filter).Find(m)
 	if result.Error != nil {
-		slog.Error("storage", "error", result.Error)
+		xlog.Error("storage", "error", result.Error)
 	}
 	return result.RowsAffected, result.Error
 }
@@ -75,7 +75,7 @@ func (s Store) List(m any, filter map[string]any) (int64, error) {
 func (s Store) Update(m any) (int64, error) {
 	result := s.db.Model(m).Updates(m)
 	if result.Error != nil {
-		slog.Error("storage", "error", result.Error)
+		xlog.Error("storage", "error", result.Error)
 	}
 	return result.RowsAffected, result.Error
 }
@@ -83,7 +83,7 @@ func (s Store) Update(m any) (int64, error) {
 func (s Store) Delete(m any, filter map[string]any) (int64, error) {
 	result := s.db.Where(filter).Delete(m)
 	if result.Error != nil {
-		slog.Error("storage", "error", result.Error)
+		xlog.Error("storage", "error", result.Error)
 	}
 	return result.RowsAffected, result.Error
 }

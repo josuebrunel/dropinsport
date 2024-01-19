@@ -2,9 +2,9 @@ package group
 
 import (
 	"context"
-	"log/slog"
 	"net/http"
 
+	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/josuebrunel/sportdropin/storage"
 	"github.com/labstack/echo/v4"
 )
@@ -39,7 +39,7 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 
 		resp, err := h.svc.Create(context, req)
 		if err != nil {
-			slog.Info("group-handler-create", "errors", err)
+			xlog.Info("group-handler-create", "errors", err)
 			ctx.Response().Header().Set("HX-Retarget", "#group-modal")
 			ctx.Response().Header().Set("HX-Reswap", "outerHTML")
 			return ctx.Render(http.StatusOK, "group-form.html", resp)
@@ -53,7 +53,7 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		uuid := ctx.Param(h.svc.GetID())
-		slog.Info("get", "group-uuid", uuid)
+		xlog.Info("get", "group-uuid", uuid)
 		if uuid == "" {
 			return ctx.Render(http.StatusOK, "group-form.html", Response{StatusCode: 200, Data: Group{}})
 		}
@@ -63,10 +63,10 @@ func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 		}
 		resp, err := h.svc.Get(context, req)
 		if err != nil {
-			slog.Error("service", "error", err, "resp", resp)
+			xlog.Error("service", "error", err, "resp", resp)
 			return ctx.Render(resp.GetStatusCode(), "error.html", NewErrorResponse(err))
 		}
-		slog.Info("get", "group", resp)
+		xlog.Info("get", "group", resp)
 		return ctx.Render(resp.GetStatusCode(), "group-form.html", resp)
 	}
 }

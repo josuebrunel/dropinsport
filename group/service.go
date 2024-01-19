@@ -3,11 +3,11 @@ package group
 import (
 	"context"
 	"errors"
-	"log/slog"
 
 	"github.com/google/uuid"
 	generic "github.com/josuebrunel/sportdropin/pkg/echogeneric"
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
+	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/josuebrunel/sportdropin/storage"
 )
 
@@ -46,7 +46,7 @@ func (r Request) GetID() string { return r.UUID.String() }
 func (r *Request) SetID(id string) error {
 	v, err := uuid.Parse(id)
 	if err != nil {
-		slog.Error("group", "set-id", err)
+		xlog.Error("group", "set-id", err)
 		return err
 	}
 	r.Group.UUID = &v
@@ -100,17 +100,17 @@ func (s Service) Create(ctx context.Context, req generic.IRequest) (generic.IRes
 		}
 	)
 	if em := r.Valid(); !em.Nil() {
-		slog.Error("error while validating request", "group", r.Group, "errors", em)
+		xlog.Error("error while validating request", "group", r.Group, "errors", em)
 		resp.Errors = em
 		resp.StatusCode = 400
 		return resp, em
 	}
 	if _, err = s.store.Create(&r.Group); err != nil {
-		slog.Error("error while creating", "group", r.Group, "error", err)
+		xlog.Error("error while creating", "group", r.Group, "error", err)
 		resp.Errors["error"] = err
 		resp.StatusCode = 500
 	} else {
-		slog.Info("group", "created", r)
+		xlog.Info("group", "created", r)
 		resp.Data = r.Group
 	}
 	return resp, err
@@ -130,7 +130,7 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 	)
 
 	if _, err = s.store.Get(&g, filter); err != nil {
-		slog.Error("error while getting", "group", r.Group.UUID, "error", err)
+		xlog.Error("error while getting", "group", r.Group.UUID, "error", err)
 		if errors.Is(err, storage.ErrNotFound) {
 			resp.StatusCode = 404
 			resp.Errors["error"] = err
@@ -139,7 +139,7 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 			resp.Errors["error"] = err
 		}
 	}
-	slog.Info("storage", "get-group", resp.Data)
+	xlog.Info("storage", "get-group", resp.Data)
 	return resp, err
 }
 
@@ -174,7 +174,7 @@ func (s Service) Update(ctx context.Context, req generic.IRequest) (generic.IRes
 	)
 
 	if _, err := s.store.Update(&r.Group); err != nil {
-		slog.Error("error while updating", "group", r.Group.UUID, "error", err)
+		xlog.Error("error while updating", "group", r.Group.UUID, "error", err)
 		if errors.Is(err, storage.ErrNotFound) {
 			resp.StatusCode = 404
 			resp.Errors["error"] = err
@@ -194,7 +194,7 @@ func (s Service) Delete(ctx context.Context, req generic.IRequest) (generic.IRes
 		err    error
 	)
 	if _, err := s.store.Delete(&r.Group, filter); err != nil {
-		slog.Error("error while deleting", "group", r.Group.UUID, "error", err)
+		xlog.Error("error while deleting", "group", r.Group.UUID, "error", err)
 		if errors.Is(err, storage.ErrNotFound) {
 			resp.StatusCode = 404
 			resp.Errors["error"] = err

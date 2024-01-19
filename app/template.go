@@ -3,9 +3,9 @@ package app
 import (
 	"html/template"
 	"io"
-	"log/slog"
 	"net/http"
 
+	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/josuebrunel/templatesmap"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,7 +23,7 @@ func (t TemplateRenderer) Render(wr io.Writer, name string, data any, ctx echo.C
 func NewTemplateRenderer(layouts string, funcs template.FuncMap, pages ...string) (*TemplateRenderer, error) {
 	tpl, err := templatesmap.NewTemplatesMap(layouts, funcs, pages...)
 	if err != nil {
-		slog.Error("templatemap", "error", err)
+		xlog.Error("templatemap", "error", err)
 		return nil, err
 	}
 	return &TemplateRenderer{templateMap: tpl}, nil
