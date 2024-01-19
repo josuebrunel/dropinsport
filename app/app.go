@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,6 +11,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
+	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/josuebrunel/sportdropin/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -30,7 +30,7 @@ func (a App) Run() {
 	// Mount storage
 	store, err := storage.NewStore(a.Opts.GetDBDSN())
 	if err != nil {
-		slog.Error("error while initializing storage", "err", err)
+		xlog.Error("error while initializing storage", "err", err)
 		return
 	}
 	// Setup
@@ -41,6 +41,23 @@ func (a App) Run() {
 		TokenLookup: "form:csrf",
 	}))
 	e.Use(middleware.CORS())
+	e.Use(middleware.Recover())
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:       true,
+		LogStatus:    true,
+		LogError:     true,
+		LogRemoteIP:  true,
+		LogMethod:    true,
+		LogURIPath:   true,
+		LogRoutePath: true,
+		LogHost:      true,
+		LogProtocol:  true,
+		HandleError:  true,
+		LogValuesFunc: func(c echo.Context, values middleware.RequestLoggerValues) error {
+			xlog.Info("request", "values", values)
+			return nil
+		},
+	}))
 
 	tplPatterns := strings.Split(a.Opts.TPLPath, ";")
 	renderer, err := NewTemplateRenderer(tplPatterns[0], sprig.FuncMap(), tplPatterns[1:]...)
