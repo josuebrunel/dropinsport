@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	generic "github.com/josuebrunel/sportdropin/pkg/echogeneric"
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
+	"github.com/josuebrunel/sportdropin/pkg/storage"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
-	"github.com/josuebrunel/sportdropin/storage"
 )
 
 func isStrNil(s *string) bool {

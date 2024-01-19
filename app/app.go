@@ -11,8 +11,8 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
+	"github.com/josuebrunel/sportdropin/pkg/storage"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
-	"github.com/josuebrunel/sportdropin/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

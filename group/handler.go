@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/josuebrunel/sportdropin/pkg/storage"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
-	"github.com/josuebrunel/sportdropin/storage"
 	"github.com/labstack/echo/v4"
 )
 

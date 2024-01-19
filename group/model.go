@@ -1,6 +1,6 @@
 package group
 
-import "github.com/josuebrunel/sportdropin/storage"
+import "github.com/josuebrunel/sportdropin/pkg/storage"
 
 type Group struct {
 	storage.BaseModel
