@@ -11,7 +11,7 @@ test:
 templ:
 	templ generate
 
-build:
+build: templ
 	go build -o bin/${NAME} cmd/main.go
 
 run: build

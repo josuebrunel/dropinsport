@@ -1,0 +1,121 @@
+package group
+
+import (
+    "fmt"
+    "github.com/josuebrunel/sportdropin/pkg/view"
+    "github.com/josuebrunel/sportdropin/pkg/view/component"
+)
+
+func Val[T any](v *T) T {
+    var r T
+    if v != nil {
+        r = *v
+    }
+    return r
+}
+
+templ GroupFormView(r Response, attr templ.Attributes) {
+    <article>
+        <header>
+            <a href="#close" aria-label="Close" class="close" data-target="group-modal" hx-get="#"
+                hx-target="#group-modal" hx-swap="delete"></a>
+        </header>
+        <form hx-target="#container" {attr...} >
+            @component.InputCSRF(view.Get[string](ctx, "csrf"))
+            <div>
+                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": Val(r.One().Sport)})
+                if !r.Errors.IfNil("sport") { 
+                    @component.Error(r.Errors.Get("sport")) 
+                }
+            </div>
+            <div>
+                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": Val(r.One().Name)})
+                if !r.Errors.IfNil("name") { 
+                    @component.Error(r.Errors.Get("name")) 
+                }
+            </div>
+            <div>
+                @component.TextAreaWithLabel(
+                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, Val(r.One().Description))
+            </div>
+            <div>
+                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": Val(r.One().Street)})
+                if !r.Errors.IfNil("street") { 
+                    @component.Error(r.Errors.Get("street")) 
+                }
+            </div>
+            <div class="grid">
+                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": Val(r.One().City)})
+                if !r.Errors.IfNil("city") { 
+                    @component.Error(r.Errors.Get("city")) 
+                }
+                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": Val(r.One().Country)})
+                if !r.Errors.IfNil("country") { 
+                    @component.Error(r.Errors.Get("country")) 
+                }
+            </div>
+            @component.ButtonSubmit("Save", templ.Attributes{
+                "value": "save", 
+                "class": "primary",
+            })
+            @component.ButtonReset("Cancel", templ.Attributes{
+                "value": "cancel",
+                "class": "contrast",
+            })
+            @component.ButtonSubmit("Delete", templ.Attributes{
+                "value": "delete",
+                "class": "secondary",
+                "hx-delete": view.Reverse(ctx, "group.delete", r.One().UUID.String()),
+                "hx-confirm": "Do you really want to delete this group?",
+                "hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
+            })
+        </form>
+    </article>
+}
+
+templ GroupListView(r Response) {
+    <div id="groups" hx-get={ view.Reverse(ctx, "group.list")} hx-trigger="groupChange from:body" hx-target="this">
+    if len(r.All()) == 0 {
+        <p>No group found</p>
+    }
+    for _, g := range r.All() {
+        <article>
+            <hgroup>
+                <h4>
+                    @component.Link(Val(g.Name), "", templ.Attributes{
+                        "hx-get": view.Reverse(ctx, "group.get", g.UUID.String()),
+                        "hx-target": "#groups",
+                    })
+                </h4>
+                <small><em>{ Val(g.Street) }, { Val(g.City) }, { Val(g.Country) }</em></small>
+                <hr />
+            </hgroup>
+            <p>{ Val(g.Description) }</p>
+
+        </article>
+    }
+    @component.Link("Add a group", "", templ.Attributes{
+        "hx-get":  view.Reverse(ctx, "group.create"),
+        "hx-target": "#groups",
+        "role": "button",
+    })
+    </div>
+}
+
+templ GroupDetailView(r Response) {
+    <article>
+        <header>
+            @component.Link(Val(r.One().Name), view.Reverse(ctx, "group.get", r.One().UUID.String()), templ.Attributes{})
+        </header>
+        <div>
+            <p> { Val(r.One().Description) }</p>
+        </div>
+        <footer>
+            <small>
+                <span>{ Val(r.One().Street) }</span>
+                <span>{ Val(r.One().City) }</span>
+                <span>{ Val(r.One().Country) }</span>
+            </small>
+        </footer>
+</article>
+}

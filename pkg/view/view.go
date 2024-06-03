@@ -16,12 +16,13 @@ var xc xcontextkey = "xcontext"
 func Render(ctx echo.Context, status int, tpl templ.Component, data any) error {
 	ctx.Response().Writer.WriteHeader(status)
 
+	csrf := ctx.Get(middleware.DefaultCSRFConfig.ContextKey).(string)
 	cx := context.Background()
 	cx = context.WithValue(cx, xc, map[string]any{
 		"request": ctx.Request(),
 		"url":     ctx.Request().URL.String(),
 		"reverse": ctx.Echo().Reverse,
-		"csrf":    ctx.Get(middleware.DefaultCSRFConfig.ContextKey).(string),
+		"csrf":    csrf,
 		"data":    data,
 	})
 
@@ -33,13 +34,16 @@ func Render(ctx echo.Context, status int, tpl templ.Component, data any) error {
 	return nil
 }
 
-func XGet(ctx context.Context, key string) any {
+func Get[T any](ctx context.Context, key string) T {
 	cx := ctx.Value(xc).(map[string]any)
-	if cx == nil {
-		return nil
-	}
+	var r T
 	if v, ok := cx[key]; ok {
-		return v
+		r = v.(T)
 	}
-	return nil
+	return r
+}
+
+func Reverse(cx context.Context, name string, values ...any) string {
+	reverse := Get[func(string, ...any) string](cx, "reverse")
+	return reverse(name, values...)
 }

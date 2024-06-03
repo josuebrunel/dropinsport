@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"time"
 
-	"github.com/Masterminds/sprig/v3"
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
 	"github.com/josuebrunel/sportdropin/pkg/storage"
+	"github.com/josuebrunel/sportdropin/pkg/view"
+	"github.com/josuebrunel/sportdropin/pkg/view/base"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -59,12 +59,6 @@ func (a App) Run() {
 		},
 	}))
 
-	tplPatterns := strings.Split(a.Opts.TPLPath, ";")
-	renderer, err := NewTemplateRenderer(tplPatterns[0], sprig.FuncMap(), tplPatterns[1:]...)
-	if err != nil {
-		return
-	}
-	e.Renderer = renderer
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	// Mount handlers
 	groupSVC := group.NewService("group", "uuid", store)
@@ -72,12 +66,15 @@ func (a App) Run() {
 	groupHandler := group.NewGroupHandler(store)
 
 	e.Static("/static", "static")
-	e.GET("/", groupHandler.List(ctx))
-	e.POST("/group/", groupHandler.Create(ctx))
-	e.GET("/group/", groupHandler.Get(ctx))
-	e.GET("/group/:uuid/", groupHandler.Get(ctx))
-	e.PATCH("/group/:uuid/", groupHandler.Update(ctx))
-	e.DELETE("/group/:uuid/", groupHandler.Delete(ctx))
+	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, base.Index(), nil) })
+	g := e.Group("/group")
+	g.GET("/", groupHandler.List(ctx)).Name = "group.list"
+	g.POST("/create/", groupHandler.Create(ctx)).Name = "group.create"
+	g.GET("/create/", groupHandler.Create(ctx)).Name = "group.create"
+	g.GET("/:uuid/", groupHandler.Get(ctx)).Name = "group.get"
+	g.PATCH("/:uuid/edit/", groupHandler.Update(ctx)).Name = "group.update"
+	g.GET("/:uuid/edit/", groupHandler.Update(ctx)).Name = "group.update"
+	g.DELETE("/:uuid/", groupHandler.Delete(ctx)).Name = "group.delete"
 
 	// Migrate models
 	models := []any{groupSVC.GetModel()}
