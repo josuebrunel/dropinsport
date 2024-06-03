@@ -1,0 +1,5 @@
+package component
+
+templ Link(name, href string, attr templ.Attributes) {
+    <a href={ templ.URL(href)} {attr...}>{name}</a>
+}

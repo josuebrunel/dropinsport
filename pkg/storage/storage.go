@@ -12,7 +12,7 @@ import (
 var ErrNotFound = gorm.ErrRecordNotFound
 
 type BaseModel struct {
-	UUID      *uuid.UUID     `json:"uuid,omitempty"`
+	UUID      uuid.UUID      `json:"uuid,omitempty"`
 	CreatedAt *time.Time     `json:"created_at,omitempty"`
 	UpdatedAt *time.Time     `json:"updated_at,omitempty"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
@@ -20,7 +20,7 @@ type BaseModel struct {
 
 func (b *BaseModel) BeforeCreate(tx *gorm.DB) error {
 	u := uuid.New()
-	b.UUID = &u
+	b.UUID = u
 	return nil
 }
 

@@ -1,0 +1,13 @@
+package component
+
+templ Button(name string, attr templ.Attributes) {
+    <button {attr...} >{ name }</button>
+}
+
+templ ButtonSubmit(name string, attr templ.Attributes) {
+    <button type="submit" {attr...} >{ name }</button>
+}
+
+templ ButtonReset(name string, attr templ.Attributes) {
+    <button type="reset" {attr...} >{ name }</button>
+}
