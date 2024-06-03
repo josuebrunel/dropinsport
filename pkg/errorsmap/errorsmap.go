@@ -13,6 +13,17 @@ func (e EMap) Nil() bool {
 	return true
 }
 
+func (e EMap) IfNil(key string) bool {
+	if e[key] == nil {
+		return true
+	}
+	return false
+}
+
+func (e EMap) Get(key string) string {
+	return e[key].Error()
+}
+
 func (e EMap) Error() string {
 	errs := make([]error, 0)
 	for _, v := range e {

@@ -49,7 +49,7 @@ func (r *Request) SetID(id string) error {
 		xlog.Error("group", "set-id", err)
 		return err
 	}
-	r.Group.UUID = &v
+	r.Group.UUID = v
 	return err
 }
 
@@ -61,6 +61,20 @@ type Response struct {
 
 func (r Response) GetStatusCode() int {
 	return r.StatusCode
+}
+
+func (r Response) One() Group {
+	if r.Data == nil {
+		return Group{}
+	}
+	return r.Data.(Group)
+}
+
+func (r Response) All() []Group {
+	if r.Data == nil || r.Data.([]Group) == nil {
+		return []Group{}
+	}
+	return r.Data.([]Group)
 }
 
 type Service struct {
@@ -124,7 +138,7 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 		resp = Response{
 			StatusCode: 200,
 			Errors:     errorsmap.New(),
-			Data:       &g,
+			Data:       g,
 		}
 		filter = map[string]any{"uuid": r.GetID()}
 	)
@@ -139,6 +153,7 @@ func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IRespon
 			resp.Errors["error"] = err
 		}
 	}
+	resp.Data = g
 	xlog.Info("storage", "get-group", resp.Data)
 	return resp, err
 }
