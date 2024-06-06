@@ -9,13 +9,15 @@ import (
 
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
-	"github.com/josuebrunel/sportdropin/pkg/storage"
+	"github.com/josuebrunel/sportdropin/pkg/db"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/base"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
+
+type ctxString string
 
 type App struct {
 	Opts config.Config
@@ -27,12 +29,14 @@ func NewApp() App {
 }
 
 func (a App) Run() {
-	// Mount storage
-	store, err := storage.NewStore(a.Opts.GetDBDSN())
+	// DB
+	db, err := db.New(a.Opts.GetDBDSN())
 	if err != nil {
-		xlog.Error("error while initializing storage", "err", err)
-		return
+		xlog.Error("error while trying to connect to db", "err", "err")
+		os.Exit(1)
 	}
+
+	defer db.Close()
 	// Setup
 	e := echo.New()
 	e.Pre(middleware.AddTrailingSlash())
@@ -59,11 +63,8 @@ func (a App) Run() {
 		},
 	}))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	// Mount handlers
-	groupSVC := group.NewService("group", "uuid", store)
-
-	groupHandler := group.NewGroupHandler(store)
+	ctx := context.Background()
+	groupHandler := group.NewGroupHandler(db)
 
 	e.Static("/static", "static")
 	e.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, base.Index(), nil) })
@@ -76,9 +77,6 @@ func (a App) Run() {
 	g.GET("/:uuid/edit/", groupHandler.Update(ctx)).Name = "group.update"
 	g.DELETE("/:uuid/", groupHandler.Delete(ctx)).Name = "group.delete"
 
-	// Migrate models
-	models := []any{groupSVC.GetModel()}
-	store.RunMigrations(models...)
 	// Start server
 	go func() {
 		if err := e.Start(a.Opts.HTTPAddr); err != nil && err != http.ErrServerClosed {
@@ -86,6 +84,7 @@ func (a App) Run() {
 		}
 	}()
 
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
 	// Use a buffered channel to avoid missing signals as recommended for signal.Notify
 	quit := make(chan os.Signal, 1)

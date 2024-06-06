@@ -2,227 +2,199 @@ package group
 
 import (
 	"context"
-	"errors"
+	"database/sql"
 
 	"github.com/google/uuid"
-	generic "github.com/josuebrunel/sportdropin/pkg/echogeneric"
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
-	"github.com/josuebrunel/sportdropin/pkg/storage"
+	"github.com/josuebrunel/sportdropin/pkg/models"
+	"github.com/josuebrunel/sportdropin/pkg/util"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-func isStrNil(s *string) bool {
-	if s == nil || *s == "" {
-		return true
-	}
-	return false
-}
-
 type Request struct {
-	Group
+	UUID    string `json:"uuid" form:"uuid"`
+	Name    string `json:"name" form:"name"`
+	Sport   string `json:"sport" form:"sport"`
+	Street  string `json:"street" form:"street"`
+	City    string `json:"city" form:"city"`
+	Country string `json:"country" form:"country"`
 }
 
-func (r Request) Valid() errorsmap.EMap {
-	var em = errorsmap.New()
-	if isStrNil(r.Group.Name) {
-		em["name"] = errors.New("<name> is required")
-	}
-	if isStrNil(r.Group.Sport) {
-		em["sport"] = errors.New("<sport> is required")
-	}
-	if isStrNil(r.Group.Street) {
-		em["street"] = errors.New("<street> is required")
-	}
-	if isStrNil(r.Group.City) {
-		em["city"] = errors.New("<city> is required")
-	}
-	if isStrNil(r.Group.Country) {
-		em["country"] = errors.New("<country> is required")
-	}
-	return em
-}
-
-func (r Request) GetID() string { return r.UUID.String() }
-func (r *Request) SetID(id string) error {
-	v, err := uuid.Parse(id)
-	if err != nil {
-		xlog.Error("group", "set-id", err)
-		return err
-	}
-	r.Group.UUID = v
-	return err
+func (r Request) Validate() error {
+	// em := errorsmap.New()
+	// if err := validate.Var(r.Name, "required"); err != nil {
+	// 	em["name"] = err
+	// }
+	// if err := validate.Var(r.Sport, "required"); err != nil {
+	// 	em["sport"] = err
+	// }
+	// if err := validate.Var(r.Street, "required"); err != nil {
+	// 	em["street"] = err
+	// }
+	// if err := validate.Var(r.City, "required"); err != nil {
+	// 	em["city"] = err
+	// }
+	// if err := validate.Var(r.Country, "required"); err != nil {
+	// 	em["country"] = err
+	// }
+	return nil
 }
 
 type Response struct {
-	StatusCode int            `json:"status_code"`
-	Errors     errorsmap.EMap `json:"errors"`
-	Data       any            `json:"data,omitempty"`
+	Errors errorsmap.EMap
+	Status int
+	Data   any
 }
 
-func (r Response) GetStatusCode() int {
-	return r.StatusCode
-}
-
-func (r Response) One() Group {
-	if r.Data == nil {
-		return Group{}
+func (r Response) One() models.Group {
+	var g models.Group
+	if d, ok := r.Data.(*models.Group); ok {
+		g = util.Deref(d)
 	}
-	return r.Data.(Group)
+	return g
 }
 
-func (r Response) All() []Group {
-	if r.Data == nil || r.Data.([]Group) == nil {
-		return []Group{}
+func (r Response) All() models.GroupSlice {
+	var gg models.GroupSlice
+	if d, ok := r.Data.(models.GroupSlice); ok {
+		gg = d
 	}
-	return r.Data.([]Group)
+	return gg
 }
 
 type Service struct {
-	Name  string
-	ID    string
-	store storage.Storer
-}
-
-func (s Service) GetName() string {
-	return s.Name
+	Name string
+	ID   string
+	db   *sql.DB
 }
 
 func (s Service) GetID() string {
 	return s.ID
 }
 
-func (s Service) GetRequest() generic.IRequest {
-	return &Request{}
+func NewService(name, id string, db *sql.DB) Service {
+	return Service{
+		Name: name,
+		ID:   id,
+		db:   db,
+	}
 }
 
-func (s Service) GetResponse() generic.IResponse {
-	return Response{}
-}
-
-func (s Service) GetModel() any {
-	return Group{}
-}
-
-func (s Service) Create(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
-	r := req.(*Request)
+func (s Service) Create(ctx context.Context, req Request) (Response, error) {
 	var (
 		err  error
-		resp = Response{
-			StatusCode: 201,
-			Errors:     errorsmap.New(),
-			Data:       Group{},
-		}
+		errM = errorsmap.New()
+		g    = GroupMFromRequest(req)
+		r    = Response{Status: 201, Data: g, Errors: errM}
 	)
-	if em := r.Valid(); !em.Nil() {
-		xlog.Error("error while validating request", "group", r.Group, "errors", em)
-		resp.Errors = em
-		resp.StatusCode = 400
-		return resp, em
+	if err = req.Validate(); err != nil {
+		xlog.Error("error while validating", "group", g, "error", err)
+		r.Errors = err.(errorsmap.EMap)
+		return r, errM
 	}
-	if _, err = s.store.Create(&r.Group); err != nil {
-		xlog.Error("error while creating", "group", r.Group, "error", err)
-		resp.Errors["error"] = err
-		resp.StatusCode = 500
-	} else {
-		xlog.Info("group", "created", r)
-		resp.Data = r.Group
+	g.UUID = uuid.New().String()
+	if err = g.Insert(ctx, s.db, boil.Infer()); err != nil {
+		xlog.Error("error while creating", "group", g, "error", err)
+		r.Errors = err.(errorsmap.EMap)
+		r.Status = 400
+		return r, errM
 	}
-	return resp, err
+	xlog.Info("group", "created", g)
+	return r, err
 }
 
-func (s Service) Get(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
-	r := req.(*Request)
+func (s Service) Get(ctx context.Context, req Request) (Response, error) {
 	var (
-		err  error
-		g    = Group{}
-		resp = Response{
-			StatusCode: 200,
-			Errors:     errorsmap.New(),
-			Data:       g,
-		}
-		filter = map[string]any{"uuid": r.GetID()}
+		err error
+		g   *models.Group
+		r   = Response{Status: 200, Data: g, Errors: errorsmap.New()}
 	)
 
-	if _, err = s.store.Get(&g, filter); err != nil {
-		xlog.Error("error while getting", "group", r.Group.UUID, "error", err)
-		if errors.Is(err, storage.ErrNotFound) {
-			resp.StatusCode = 404
-			resp.Errors["error"] = err
-		} else {
-			resp.StatusCode = 500
-			resp.Errors["error"] = err
-		}
+	if g, err = models.FindGroup(ctx, s.db, req.UUID); err != nil {
+		xlog.Error("error while getting", "group", req.UUID, "error", err)
+		r.Errors["error"] = err
+		r.Status = 500
+		return r, err
 	}
-	resp.Data = g
-	xlog.Info("storage", "get-group", resp.Data)
-	return resp, err
+	r.Data = g
+	return r, err
 }
 
-func (s Service) List(ctx context.Context, filters map[string]any) (generic.IResponse, error) {
+func (s Service) List(ctx context.Context, filters map[string]any) (Response, error) {
 	var (
-		err    error
-		groups []Group
-		resp   = Response{
-			StatusCode: 200,
-			Errors:     errorsmap.New(),
-			Data:       groups,
-		}
+		err      error
+		groups   models.GroupSlice
+		qFilters []qm.QueryMod
+		r        = Response{Status: 200, Errors: errorsmap.New()}
 	)
 
-	if _, err = s.store.List(&resp.Data, filters); err != nil {
-		resp.StatusCode = 500
-		resp.Errors["error"] = err
+	for k, v := range filters {
+		qFilters = append(qFilters, qm.Where(k+"=?", v))
 	}
-	return resp, err
+
+	if groups, err = models.Groups(qFilters...).All(ctx, s.db); err != nil {
+		xlog.Error("error while listing", "error", err)
+		r.Errors["error"] = err
+		return r, err
+	}
+	r.Data = groups
+	return r, err
 
 }
 
-func (s Service) Update(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
-	r := req.(*Request)
+func (s Service) Update(ctx context.Context, req Request) (Response, error) {
 	var (
-		err  error
-		resp = Response{
-			StatusCode: 202,
-			Errors:     errorsmap.New(),
-			Data:       r.Group,
-		}
+		err error
+		g   *models.Group
+		r   = Response{Status: 200, Data: g, Errors: errorsmap.New()}
 	)
-
-	if _, err := s.store.Update(&r.Group); err != nil {
-		xlog.Error("error while updating", "group", r.Group.UUID, "error", err)
-		if errors.Is(err, storage.ErrNotFound) {
-			resp.StatusCode = 404
-			resp.Errors["error"] = err
-		} else {
-			resp.StatusCode = 500
-			resp.Errors["error"] = err
-		}
+	if err = req.Validate(); err != nil {
+		xlog.Error("error while validating", "group", g, "error", err)
+		r.Errors = err.(errorsmap.EMap)
+		return r, err
 	}
-	return resp, err
+	if g, err = models.FindGroup(ctx, s.db, req.UUID); err != nil {
+		xlog.Error("error while getting", "group", req.UUID, "error", err)
+		return r, err
+	}
+
+	g = GroupMFromRequest(req)
+	g.UUID = req.UUID
+	if _, err = g.Update(ctx, s.db, boil.Infer()); err != nil {
+		xlog.Error("error while updating", "group", g, "error", err)
+		r.Status = 500
+		r.Errors["error"] = err
+		return r, err
+	}
+	r.Data = g
+	return r, err
 }
 
-func (s Service) Delete(ctx context.Context, req generic.IRequest) (generic.IResponse, error) {
+func (s Service) Delete(ctx context.Context, req Request) error {
 	var (
-		r      = req.(*Request)
-		filter = map[string]any{"uuid": r.UUID.String()}
-		resp   = Response{StatusCode: 204}
-		err    error
+		err error
+		g   *models.Group
 	)
-	if _, err := s.store.Delete(&r.Group, filter); err != nil {
-		xlog.Error("error while deleting", "group", r.Group.UUID, "error", err)
-		if errors.Is(err, storage.ErrNotFound) {
-			resp.StatusCode = 404
-			resp.Errors["error"] = err
-		} else {
-			resp.StatusCode = 500
-			resp.Errors["error"] = err
-		}
+	if g, err = models.FindGroup(ctx, s.db, req.UUID); err != nil {
+		xlog.Error("error while getting", "group", req.UUID, "error", err)
+		return err
 	}
-	return resp, err
+	if _, err = g.Delete(ctx, s.db); err != nil {
+		xlog.Error("error while deleting", "group", g, "error", err)
+		return err
+	}
+	return err
 }
 
-func NewService(name, id string, store storage.Storer) Service {
-	return Service{Name: name, ID: id, store: store}
+func GroupMFromRequest(req Request) *models.Group {
+	return &models.Group{
+		Name:    req.Name,
+		Sport:   req.Sport,
+		Street:  null.StringFrom(req.Street),
+		City:    null.StringFrom(req.City),
+		Country: null.StringFrom(req.Country),
+	}
 }
-
-var _ generic.Service = Service{}
