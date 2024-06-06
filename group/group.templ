@@ -2,17 +2,10 @@ package group
 
 import (
     "fmt"
+    "github.com/josuebrunel/sportdropin/pkg/models"
     "github.com/josuebrunel/sportdropin/pkg/view"
     "github.com/josuebrunel/sportdropin/pkg/view/component"
 )
-
-func Val[T any](v *T) T {
-    var r T
-    if v != nil {
-        r = *v
-    }
-    return r
-}
 
 templ GroupFormView(r Response, attr templ.Attributes) {
     <article>
@@ -23,33 +16,33 @@ templ GroupFormView(r Response, attr templ.Attributes) {
         <form hx-target="#container" {attr...} >
             @component.InputCSRF(view.Get[string](ctx, "csrf"))
             <div>
-                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": Val(r.One().Sport)})
+                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": r.One().Sport, "required": true})
                 if !r.Errors.IfNil("sport") { 
                     @component.Error(r.Errors.Get("sport")) 
                 }
             </div>
             <div>
-                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": Val(r.One().Name)})
+                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.One().Name, "required": true})
                 if !r.Errors.IfNil("name") { 
                     @component.Error(r.Errors.Get("name")) 
                 }
             </div>
             <div>
                 @component.TextAreaWithLabel(
-                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, Val(r.One().Description))
+                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.One().Description.String)
             </div>
             <div>
-                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": Val(r.One().Street)})
+                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.One().Street.String, "required": true})
                 if !r.Errors.IfNil("street") { 
                     @component.Error(r.Errors.Get("street")) 
                 }
             </div>
             <div class="grid">
-                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": Val(r.One().City)})
+                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.One().City.String, "required": true})
                 if !r.Errors.IfNil("city") { 
                     @component.Error(r.Errors.Get("city")) 
                 }
-                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": Val(r.One().Country)})
+                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.One().Country.String, "required": true})
                 if !r.Errors.IfNil("country") { 
                     @component.Error(r.Errors.Get("country")) 
                 }
@@ -65,7 +58,7 @@ templ GroupFormView(r Response, attr templ.Attributes) {
             @component.ButtonSubmit("Delete", templ.Attributes{
                 "value": "delete",
                 "class": "secondary",
-                "hx-delete": view.Reverse(ctx, "group.delete", r.One().UUID.String()),
+                "hx-delete": view.Reverse(ctx, "group.delete", r.One().UUID),
                 "hx-confirm": "Do you really want to delete this group?",
                 "hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
             })
@@ -73,24 +66,24 @@ templ GroupFormView(r Response, attr templ.Attributes) {
     </article>
 }
 
-templ GroupListView(r Response) {
+templ GroupListView(gg models.GroupSlice) {
     <div id="groups" hx-get={ view.Reverse(ctx, "group.list")} hx-trigger="groupChange from:body" hx-target="this">
-    if len(r.All()) == 0 {
+    if len(gg) == 0 {
         <p>No group found</p>
     }
-    for _, g := range r.All() {
+    for _, g := range gg {
         <article>
             <hgroup>
                 <h4>
-                    @component.Link(Val(g.Name), "", templ.Attributes{
-                        "hx-get": view.Reverse(ctx, "group.get", g.UUID.String()),
+                    @component.Link(g.Name, "", templ.Attributes{
+                        "hx-get": view.Reverse(ctx, "group.get", g.UUID),
                         "hx-target": "#groups",
                     })
                 </h4>
-                <small><em>{ Val(g.Street) }, { Val(g.City) }, { Val(g.Country) }</em></small>
+                <small><em>{ g.Street.String }, { g.City.String }, { g.Country.String }</em></small>
                 <hr />
             </hgroup>
-            <p>{ Val(g.Description) }</p>
+            <p>{ g.Description.String }</p>
 
         </article>
     }
@@ -102,19 +95,19 @@ templ GroupListView(r Response) {
     </div>
 }
 
-templ GroupDetailView(r Response) {
+templ GroupDetailView(g models.Group) {
     <article>
         <header>
-            @component.Link(Val(r.One().Name), view.Reverse(ctx, "group.get", r.One().UUID.String()), templ.Attributes{})
+            @component.Link(g.Name, view.Reverse(ctx, "group.get", g.UUID), templ.Attributes{})
         </header>
         <div>
-            <p> { Val(r.One().Description) }</p>
+            <p> { g.Description.String }</p>
         </div>
         <footer>
             <small>
-                <span>{ Val(r.One().Street) }</span>
-                <span>{ Val(r.One().City) }</span>
-                <span>{ Val(r.One().Country) }</span>
+                <span>{ g.Street.String }</span>
+                <span>{ g.City.String }</span>
+                <span>{ g.Country.String }</span>
             </small>
         </footer>
 </article>

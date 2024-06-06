@@ -3,7 +3,7 @@ package component
 import "strings"
 
 templ Label(label, name string) {
-	<label For={ name }>{ label }</label>
+	<label For={ label }>{ strings.Title(name) }</label>
 }
 
 templ Input(attr templ.Attributes) {
@@ -11,7 +11,7 @@ templ Input(attr templ.Attributes) {
 }
 
 templ InputWithLabel(label string, attr templ.Attributes) {
-	@Label(strings.ToLower(label), strings.ToUpper(label))
+	@Label(label, label)
 	@Input(attr)
 }
 
@@ -40,6 +40,6 @@ templ TextArea(attr templ.Attributes, value string) {
 }
 
 templ TextAreaWithLabel(label string, attr templ.Attributes, value string) {
-	@Label(strings.ToLower(label), strings.ToUpper(label))
+	@Label(label, label)
 	@TextArea(attr, value)
 }

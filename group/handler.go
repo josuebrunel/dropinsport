@@ -2,9 +2,11 @@ package group
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 
-	"github.com/josuebrunel/sportdropin/pkg/storage"
+	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
+	"github.com/josuebrunel/sportdropin/pkg/models"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
@@ -25,20 +27,22 @@ type GroupHandler struct {
 	svc Service
 }
 
-func NewGroupHandler(store storage.Storer) *GroupHandler {
-	return &GroupHandler{svc: NewService("group", "uuid", store)}
+func NewGroupHandler(db *sql.DB) *GroupHandler {
+	return &GroupHandler{svc: NewService("group", "uuid", db)}
 }
 
 func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var (
 			err error
-			req = h.svc.GetRequest()
+			req = Request{}
 		)
 		if ctx.Request().Method == http.MethodGet {
-			return view.Render(ctx, http.StatusOK, GroupFormView(Response{}, map[string]any{"hx-post": reverse(ctx, "group.create")}), nil)
+			return view.Render(ctx, http.StatusOK, GroupFormView(
+				Response{Data: &models.Group{}, Errors: errorsmap.New()},
+				map[string]any{"hx-post": reverse(ctx, "group.create")}), nil)
 		}
-		if err = ctx.Bind(req); err != nil {
+		if err = ctx.Bind(&req); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 
@@ -52,7 +56,7 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
-		return view.Render(ctx, http.StatusOK, GroupListView(resp.(Response)), nil)
+		return view.Render(ctx, http.StatusOK, GroupListView(resp.All()), nil)
 
 	}
 
@@ -62,18 +66,16 @@ func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		uuid := ctx.Param(h.svc.GetID())
 		xlog.Info("get", "group-uuid", uuid)
-		req := h.svc.GetRequest()
-		if err := req.SetID(uuid); err != nil {
-			return view.Render(ctx, http.StatusOK, GroupFormView(Response{}, map[string]any{"hx-get": reverse(ctx, "group.list")}), nil)
-		}
+		req := Request{UUID: uuid}
 		resp, err := h.svc.Get(context, req)
+		group := resp.One()
 		if err != nil {
-			xlog.Error("service", "error", err, "resp", resp)
+			xlog.Error("service", "error", err, "group", group)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		xlog.Info("get", "group", resp)
-		return view.Render(ctx, http.StatusOK, GroupFormView(resp.(Response), map[string]any{
-			"hx-patch": reverse(ctx, "group.update", resp.(Response).One().UUID.String())}), nil)
+		xlog.Info("get", "group", group)
+		return view.Render(ctx, http.StatusOK, GroupFormView(resp, map[string]any{
+			"hx-patch": reverse(ctx, "group.update", group.UUID)}), nil)
 	}
 }
 
@@ -81,14 +83,12 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		uuid := ctx.Param(h.svc.GetID())
 		if ctx.Request().Method == http.MethodGet {
-			return view.Render(ctx, http.StatusOK, GroupFormView(Response{},
+			return view.Render(ctx, http.StatusOK, GroupFormView(
+				Response{Data: &models.Group{}, Errors: errorsmap.New()},
 				map[string]any{"hx-patch": reverse(ctx, "group.update", uuid)}), nil)
 		}
-		req := h.svc.GetRequest()
-		if err := ctx.Bind(req); err != nil {
-			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
-		}
-		if err := req.SetID(uuid); err != nil {
+		req := Request{UUID: uuid}
+		if err := ctx.Bind(&req); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		_, err := h.svc.Update(context, req)
@@ -100,7 +100,7 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
-		return view.Render(ctx, http.StatusOK, GroupListView(resp.(Response)), nil)
+		return view.Render(ctx, http.StatusOK, GroupListView(resp.All()), nil)
 	}
 }
 
@@ -114,19 +114,15 @@ func (h GroupHandler) List(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		return view.Render(ctx, http.StatusOK, GroupListView(resp.(Response)), nil)
+		return view.Render(ctx, http.StatusOK, GroupListView(resp.All()), nil)
 	}
 }
 
 func (h GroupHandler) Delete(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		uuid := ctx.Param(h.svc.GetID())
-		req := h.svc.GetRequest()
-		if err := req.SetID(uuid); err != nil {
-			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
-		}
-		_, err := h.svc.Delete(context, req)
-		if err != nil {
+		req := Request{UUID: uuid}
+		if err := h.svc.Delete(context, req); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		resp, err := h.svc.List(context, map[string]any{})
@@ -134,7 +130,7 @@ func (h GroupHandler) Delete(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
-		return view.Render(ctx, http.StatusOK, GroupListView(resp.(Response)), nil)
+		return view.Render(ctx, http.StatusOK, GroupListView(resp.All()), nil)
 
 	}
 }
