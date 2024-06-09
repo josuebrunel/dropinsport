@@ -2,12 +2,11 @@ package group
 
 import (
     "fmt"
-    "github.com/josuebrunel/sportdropin/pkg/models"
     "github.com/josuebrunel/sportdropin/pkg/view"
     "github.com/josuebrunel/sportdropin/pkg/view/component"
 )
 
-templ GroupFormView(r Response, attr templ.Attributes) {
+templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
     <article>
         <header>
             <a href="#close" aria-label="Close" class="close" data-target="group-modal" hx-get="#"
@@ -16,35 +15,35 @@ templ GroupFormView(r Response, attr templ.Attributes) {
         <form hx-target="#container" {attr...} >
             @component.InputCSRF(view.Get[string](ctx, "csrf"))
             <div>
-                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": r.One().Sport, "required": true})
-                if !r.Errors.IfNil("sport") { 
-                    @component.Error(r.Errors.Get("sport")) 
+                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": r.Val().GetString("sport"), "required": true})
+                if !r.ErrNil("sport") { 
+                    @component.Error(r.ErrGet("sport")) 
                 }
             </div>
             <div>
-                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.One().Name, "required": true})
-                if !r.Errors.IfNil("name") { 
-                    @component.Error(r.Errors.Get("name")) 
+                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.Val().GetString("name"), "required": true})
+                if !r.ErrNil("name") { 
+                    @component.Error(r.ErrGet("name")) 
                 }
             </div>
             <div>
                 @component.TextAreaWithLabel(
-                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.One().Description.String)
+                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.Val().GetString("Description"))
             </div>
             <div>
-                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.One().Street.String, "required": true})
-                if !r.Errors.IfNil("street") { 
-                    @component.Error(r.Errors.Get("street")) 
+                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.Val().GetString("street"), "required": true})
+                if !r.ErrNil("street") { 
+                    @component.Error(r.ErrGet("street")) 
                 }
             </div>
             <div class="grid">
-                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.One().City.String, "required": true})
-                if !r.Errors.IfNil("city") { 
-                    @component.Error(r.Errors.Get("city")) 
+                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.Val().GetString("city"), "required": true})
+                if !r.ErrNil("city") { 
+                    @component.Error(r.ErrGet("city")) 
                 }
-                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.One().Country.String, "required": true})
-                if !r.Errors.IfNil("country") { 
-                    @component.Error(r.Errors.Get("country")) 
+                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.Val().GetString("country"), "required": true})
+                if !r.ErrNil("country") { 
+                    @component.Error(r.ErrGet("country")) 
                 }
             </div>
             @component.ButtonSubmit("Save", templ.Attributes{
@@ -58,7 +57,7 @@ templ GroupFormView(r Response, attr templ.Attributes) {
             @component.ButtonSubmit("Delete", templ.Attributes{
                 "value": "delete",
                 "class": "secondary",
-                "hx-delete": view.Reverse(ctx, "group.delete", r.One().UUID),
+                "hx-delete": view.Reverse(ctx, "group.delete", r.Val().GetString("uuid")),
                 "hx-confirm": "Do you really want to delete this group?",
                 "hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
             })
@@ -66,48 +65,48 @@ templ GroupFormView(r Response, attr templ.Attributes) {
     </article>
 }
 
-templ GroupListView(gg models.GroupSlice) {
+templ GroupListView(gg view.ViewData[RecordSlice]) {
     <div id="groups" hx-get={ view.Reverse(ctx, "group.list")} hx-trigger="groupChange from:body" hx-target="this">
-    if len(gg) == 0 {
+    if len(gg.Val()) == 0 {
         <p>No group found</p>
     }
-    for _, g := range gg {
+    for _, g := range gg.Val() {
         <article>
             <hgroup>
                 <h4>
-                    @component.Link(g.Name, "", templ.Attributes{
-                        "hx-get": view.Reverse(ctx, "group.get", g.UUID),
+                    @component.Link(g.GetString("name"), "", templ.Attributes{
+                        "hx-get": view.Reverse(ctx, "group.get", g.GetString("uuid")),
                         "hx-target": "#groups",
                     })
                 </h4>
-                <small><em>{ g.Street.String }, { g.City.String }, { g.Country.String }</em></small>
+                <small><em>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</em></small>
                 <hr />
             </hgroup>
-            <p>{ g.Description.String }</p>
+            <p>{ g.GetString("description") }</p>
 
         </article>
     }
     @component.Link("Add a group", "", templ.Attributes{
         "hx-get":  view.Reverse(ctx, "group.create"),
-        "hx-target": "#groups",
+        "hx-target": "#container",
         "role": "button",
     })
     </div>
 }
 
-templ GroupDetailView(g models.Group) {
+templ GroupDetailView(g view.ViewData[Record]) {
     <article>
         <header>
-            @component.Link(g.Name, view.Reverse(ctx, "group.get", g.UUID), templ.Attributes{})
+            @component.Link(g.Val().GetString("name"), view.Reverse(ctx, "group.get", g.Val().GetString("uuid")), templ.Attributes{})
         </header>
         <div>
-            <p> { g.Description.String }</p>
+            <p> { g.Val().GetString("description") }</p>
         </div>
         <footer>
             <small>
-                <span>{ g.Street.String }</span>
-                <span>{ g.City.String }</span>
-                <span>{ g.Country.String }</span>
+                <span>{ g.Val().GetString("street") }</span>
+                <span>{ g.Val().GetString("city") }</span>
+                <span>{ g.Val().GetString("country") }</span>
             </small>
         </footer>
 </article>
