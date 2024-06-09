@@ -16,13 +16,13 @@ deps:
 
 dev.deps: deps
 	go install -ldflags "-s -w -extldflags '-static'" github.com/go-delve/delve/cmd/dlv@latest
-dev.build: templ
+	dev.build: templ
 	go build -gcflags "all=-N -l" -o ${BIN} ${MAIN}
 
 goose.env:
 	export GOOSE_DRIVER=postgres
 	export GOOSE_MIGRATION_DIR=${MIGRATION_DIR}
-goose.status: goose.env
+	goose.status: goose.env
 	goose status
 goose.up:
 	goose up
@@ -39,11 +39,17 @@ test:
 templ:
 	templ generate
 
-debug: dev.build
+debug: build
 	dlv --listen=:8080 --headless=true --log=true --accept-multiclient --api-version=2 exec ${BIN}
 
 build: templ
 	go build -o ${BIN} ${MAIN}
 
+migrate.up: build
+	./${BIN} migrate up
+migrate.down: build
+	./${BIN} migrate down
+
 run: build
-	./bin/${NAME}
+	./${BIN} --dev serve --http="0.0.0.0:8080"
+	# ./bin/${NAME}

@@ -12,12 +12,11 @@ import "bytes"
 
 import (
 	"fmt"
-	"github.com/josuebrunel/sportdropin/pkg/models"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
 )
 
-func GroupFormView(r Response, attr templ.Attributes) templ.Component {
+func GroupFormView(r view.ViewData[Record], attr templ.Attributes) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -50,12 +49,12 @@ func GroupFormView(r Response, attr templ.Attributes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = component.InputWithLabel("sport", templ.Attributes{"type": "text", "name": "sport", "value": r.One().Sport, "required": true}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.InputWithLabel("sport", templ.Attributes{"type": "text", "name": "sport", "value": r.Val().GetString("sport"), "required": true}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !r.Errors.IfNil("sport") {
-			templ_7745c5c3_Err = component.Error(r.Errors.Get("sport")).Render(ctx, templ_7745c5c3_Buffer)
+		if !r.ErrNil("sport") {
+			templ_7745c5c3_Err = component.Error(r.ErrGet("sport")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -64,12 +63,12 @@ func GroupFormView(r Response, attr templ.Attributes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.One().Name, "required": true}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.Val().GetString("name"), "required": true}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !r.Errors.IfNil("name") {
-			templ_7745c5c3_Err = component.Error(r.Errors.Get("name")).Render(ctx, templ_7745c5c3_Buffer)
+		if !r.ErrNil("name") {
+			templ_7745c5c3_Err = component.Error(r.ErrGet("name")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -79,7 +78,7 @@ func GroupFormView(r Response, attr templ.Attributes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = component.TextAreaWithLabel(
-			"description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.One().Description.String).Render(ctx, templ_7745c5c3_Buffer)
+			"description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.Val().GetString("Description")).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -87,12 +86,12 @@ func GroupFormView(r Response, attr templ.Attributes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.One().Street.String, "required": true}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.Val().GetString("street"), "required": true}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !r.Errors.IfNil("street") {
-			templ_7745c5c3_Err = component.Error(r.Errors.Get("street")).Render(ctx, templ_7745c5c3_Buffer)
+		if !r.ErrNil("street") {
+			templ_7745c5c3_Err = component.Error(r.ErrGet("street")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -101,22 +100,22 @@ func GroupFormView(r Response, attr templ.Attributes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.One().City.String, "required": true}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.Val().GetString("city"), "required": true}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !r.Errors.IfNil("city") {
-			templ_7745c5c3_Err = component.Error(r.Errors.Get("city")).Render(ctx, templ_7745c5c3_Buffer)
+		if !r.ErrNil("city") {
+			templ_7745c5c3_Err = component.Error(r.ErrGet("city")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.One().Country.String, "required": true}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.Val().GetString("country"), "required": true}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !r.Errors.IfNil("country") {
-			templ_7745c5c3_Err = component.Error(r.Errors.Get("country")).Render(ctx, templ_7745c5c3_Buffer)
+		if !r.ErrNil("country") {
+			templ_7745c5c3_Err = component.Error(r.ErrGet("country")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -142,7 +141,7 @@ func GroupFormView(r Response, attr templ.Attributes) templ.Component {
 		templ_7745c5c3_Err = component.ButtonSubmit("Delete", templ.Attributes{
 			"value":      "delete",
 			"class":      "secondary",
-			"hx-delete":  view.Reverse(ctx, "group.delete", r.One().UUID),
+			"hx-delete":  view.Reverse(ctx, "group.delete", r.Val().GetString("uuid")),
 			"hx-confirm": "Do you really want to delete this group?",
 			"hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
 		}).Render(ctx, templ_7745c5c3_Buffer)
@@ -160,7 +159,7 @@ func GroupFormView(r Response, attr templ.Attributes) templ.Component {
 	})
 }
 
-func GroupListView(gg models.GroupSlice) templ.Component {
+func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -180,7 +179,7 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "group.list"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 70, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 69, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -190,19 +189,19 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(gg) == 0 {
+		if len(gg.Val()) == 0 {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>No group found</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		for _, g := range gg {
+		for _, g := range gg.Val() {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article><hgroup><h4>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = component.Link(g.Name, "", templ.Attributes{
-				"hx-get":    view.Reverse(ctx, "group.get", g.UUID),
+			templ_7745c5c3_Err = component.Link(g.GetString("name"), "", templ.Attributes{
+				"hx-get":    view.Reverse(ctx, "group.get", g.GetString("uuid")),
 				"hx-target": "#groups",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -213,9 +212,9 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(g.Street.String)
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("street"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 83, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 82, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -226,9 +225,9 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(g.City.String)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("city"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 83, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 82, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -239,9 +238,9 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(g.Country.String)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("country"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 83, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 82, Col: 103}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -252,9 +251,9 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(g.Description.String)
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("description"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 86, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 85, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -267,7 +266,7 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 		}
 		templ_7745c5c3_Err = component.Link("Add a group", "", templ.Attributes{
 			"hx-get":    view.Reverse(ctx, "group.create"),
-			"hx-target": "#groups",
+			"hx-target": "#container",
 			"role":      "button",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -284,7 +283,7 @@ func GroupListView(gg models.GroupSlice) templ.Component {
 	})
 }
 
-func GroupDetailView(g models.Group) templ.Component {
+func GroupDetailView(g view.ViewData[Record]) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -301,7 +300,7 @@ func GroupDetailView(g models.Group) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = component.Link(g.Name, view.Reverse(ctx, "group.get", g.UUID), templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.Link(g.Val().GetString("name"), view.Reverse(ctx, "group.get", g.Val().GetString("uuid")), templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -310,9 +309,9 @@ func GroupDetailView(g models.Group) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(g.Description.String)
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(g.Val().GetString("description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 104, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 103, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -323,9 +322,9 @@ func GroupDetailView(g models.Group) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(g.Street.String)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(g.Val().GetString("street"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 108, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 107, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -336,9 +335,9 @@ func GroupDetailView(g models.Group) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(g.City.String)
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(g.Val().GetString("city"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 109, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 108, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -349,9 +348,9 @@ func GroupDetailView(g models.Group) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(g.Country.String)
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(g.Val().GetString("country"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 110, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 109, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
