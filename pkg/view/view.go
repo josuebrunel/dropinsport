@@ -20,13 +20,10 @@ type ViewData[T any] struct {
 
 func (v ViewData[T]) ErrNil(key string) bool   { return v.Errors[key] == nil }
 func (v ViewData[T]) ErrGet(key string) string { return v.Errors[key].Error() }
+func (v ViewData[T]) V() T                     { return v.Data }
 
 func NewViewData[T any](data T, errs map[string]error) ViewData[T] {
 	return ViewData[T]{Data: data, Errors: errs}
-}
-
-func (v ViewData[T]) Val() T {
-	return v.Data
 }
 
 func Render(ctx echo.Context, status int, tpl templ.Component, data any) error {

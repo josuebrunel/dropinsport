@@ -15,33 +15,33 @@ templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
         <form hx-target="#container" {attr...} >
             @component.InputCSRF(view.Get[string](ctx, "csrf"))
             <div>
-                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": r.Val().GetString("sport"), "required": true})
+                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": r.V().GetString("sport"), "required": true})
                 if !r.ErrNil("sport") { 
                     @component.Error(r.ErrGet("sport")) 
                 }
             </div>
             <div>
-                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.Val().GetString("name"), "required": true})
+                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true})
                 if !r.ErrNil("name") { 
                     @component.Error(r.ErrGet("name")) 
                 }
             </div>
             <div>
                 @component.TextAreaWithLabel(
-                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.Val().GetString("Description"))
+                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.V().GetString("Description"))
             </div>
             <div>
-                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.Val().GetString("street"), "required": true})
+                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.V().GetString("street"), "required": true})
                 if !r.ErrNil("street") { 
                     @component.Error(r.ErrGet("street")) 
                 }
             </div>
             <div class="grid">
-                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.Val().GetString("city"), "required": true})
+                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.V().GetString("city"), "required": true})
                 if !r.ErrNil("city") { 
                     @component.Error(r.ErrGet("city")) 
                 }
-                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.Val().GetString("country"), "required": true})
+                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.V().GetString("country"), "required": true})
                 if !r.ErrNil("country") { 
                     @component.Error(r.ErrGet("country")) 
                 }
@@ -57,7 +57,7 @@ templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
             @component.ButtonSubmit("Delete", templ.Attributes{
                 "value": "delete",
                 "class": "secondary",
-                "hx-delete": view.Reverse(ctx, "group.delete", r.Val().GetString("uuid")),
+                "hx-delete": view.Reverse(ctx, "group.delete", r.V().GetString("uuid")),
                 "hx-confirm": "Do you really want to delete this group?",
                 "hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
             })
@@ -67,10 +67,10 @@ templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
 
 templ GroupListView(gg view.ViewData[RecordSlice]) {
     <div id="groups" hx-get={ view.Reverse(ctx, "group.list")} hx-trigger="groupChange from:body" hx-target="this">
-    if len(gg.Val()) == 0 {
+    if len(gg.V()) == 0 {
         <p>No group found</p>
     }
-    for _, g := range gg.Val() {
+    for _, g := range gg.V() {
         <article>
             <hgroup>
                 <h4>
@@ -97,16 +97,16 @@ templ GroupListView(gg view.ViewData[RecordSlice]) {
 templ GroupDetailView(g view.ViewData[Record]) {
     <article>
         <header>
-            @component.Link(g.Val().GetString("name"), view.Reverse(ctx, "group.get", g.Val().GetString("uuid")), templ.Attributes{})
+            @component.Link(g.V().GetString("name"), view.Reverse(ctx, "group.get", g.V().GetString("uuid")), templ.Attributes{})
         </header>
         <div>
-            <p> { g.Val().GetString("description") }</p>
+            <p> { g.V().GetString("description") }</p>
         </div>
         <footer>
             <small>
-                <span>{ g.Val().GetString("street") }</span>
-                <span>{ g.Val().GetString("city") }</span>
-                <span>{ g.Val().GetString("country") }</span>
+                <span>{ g.V().GetString("street") }</span>
+                <span>{ g.V().GetString("city") }</span>
+                <span>{ g.V().GetString("country") }</span>
             </small>
         </footer>
 </article>

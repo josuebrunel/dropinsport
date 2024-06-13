@@ -62,7 +62,7 @@ func (s Service) Create(ctx context.Context, req Request) (view.ViewData[Record]
 	if err != nil {
 		xlog.Error("error while finding collection", "collection", s.Name, "error", err)
 		em["error"] = err
-		return view.NewViewData(&models.Record{}, em), err
+		return view.NewViewData(s.GetNewRecord(), em), err
 	}
 
 	record := models.NewRecord(collection)
@@ -76,7 +76,7 @@ func (s Service) Create(ctx context.Context, req Request) (view.ViewData[Record]
 	if err = s.db.SaveRecord(record); err != nil {
 		xlog.Error("error while inserting", "record", record, "error", err)
 		em["error"] = err
-		return view.NewViewData(&models.Record{}, em), err
+		return view.NewViewData(s.GetNewRecord(), em), err
 	}
 
 	return view.NewViewData(record, em), nil
@@ -88,7 +88,7 @@ func (s Service) Get(ctx context.Context, req Request) (view.ViewData[Record], e
 	if err != nil {
 		xlog.Error("error while getting", "record", req.UUID, "error", err)
 		em["error"] = err
-		return view.NewViewData(&models.Record{}, em), err
+		return view.NewViewData(s.GetNewRecord(), em), err
 	}
 	return view.NewViewData(record, em), nil
 }
@@ -118,7 +118,7 @@ func (s Service) Update(ctx context.Context, req Request) (view.ViewData[Record]
 	if err != nil {
 		xlog.Error("error while getting", "record", req.UUID, "error", err)
 		em["error"] = err
-		return view.NewViewData(&models.Record{}, em), err
+		return view.NewViewData(s.GetNewRecord(), em), err
 	}
 
 	record.Set("name", req.Name)
@@ -130,7 +130,7 @@ func (s Service) Update(ctx context.Context, req Request) (view.ViewData[Record]
 	if err = s.db.SaveRecord(record); err != nil {
 		xlog.Error("error while updating", "record", record, "error", err)
 		em["error"] = err
-		return view.NewViewData(&models.Record{}, em), err
+		return view.NewViewData(s.GetNewRecord(), em), err
 	}
 
 	return view.NewViewData(record, em), err
