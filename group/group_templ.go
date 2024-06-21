@@ -131,13 +131,6 @@ func GroupFormView(r view.ViewData[Record], attr templ.Attributes) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = component.ButtonReset("Cancel", templ.Attributes{
-			"value": "cancel",
-			"class": "contrast",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = component.ButtonSubmit("Delete", templ.Attributes{
 			"value":      "delete",
 			"class":      "secondary",
