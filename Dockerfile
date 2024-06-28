@@ -13,5 +13,5 @@ RUN     CGO_ENABLED=0 make build
 # Deploy
 FROM    alpine:latest
 COPY    --from=build /go/src/app/bin/sdi ./
-EXPOSE  8080
+EXPOSE  8080 4000
 CMD     ["./sdi"]

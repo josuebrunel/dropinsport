@@ -26,9 +26,10 @@ services:
           - env
         ports:
             - "8999:8080"
-        depends_on:
-          db:
-            condition: service_healthy
+            - "8998:4000"
+            # depends_on:
+            #   db:
+            #     condition: service_healthy
         networks:
           - sdi
         volumes:
