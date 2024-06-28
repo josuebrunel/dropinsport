@@ -86,6 +86,42 @@ func (a App) Run() {
 			Handler: groupHandler.Delete(ctx),
 			Name:    "group.delete",
 		})
+		g.AddRoute(echo.Route{
+			Method:  http.MethodGet,
+			Path:    "/:uuid/season/create",
+			Handler: groupHandler.SeasonCreate(ctx),
+			Name:    "season.create",
+		})
+		g.AddRoute(echo.Route{
+			Method:  http.MethodPost,
+			Path:    "/:uuid/season/create",
+			Handler: groupHandler.SeasonCreate(ctx),
+			Name:    "season.created",
+		})
+		g.AddRoute(echo.Route{
+			Method:  http.MethodGet,
+			Path:    "/:uuid/seasons",
+			Handler: groupHandler.SeasonList(ctx),
+			Name:    "season.list",
+		})
+		g.AddRoute(echo.Route{
+			Method:  http.MethodGet,
+			Path:    "/:uuid/season/:seasonid/edit",
+			Handler: groupHandler.SeasonEdit(ctx),
+			Name:    "season.edit",
+		})
+		g.AddRoute(echo.Route{
+			Method:  http.MethodPatch,
+			Path:    "/:uuid/season/:seasonid/edit",
+			Handler: groupHandler.SeasonEdit(ctx),
+			Name:    "season.edit",
+		})
+		g.AddRoute(echo.Route{
+			Method:  http.MethodDelete,
+			Path:    "/:uuid/season/:seasonid",
+			Handler: groupHandler.SeasonDelete(ctx),
+			Name:    "season.delete",
+		})
 		return nil
 	})
 

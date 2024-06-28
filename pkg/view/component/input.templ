@@ -43,3 +43,20 @@ templ TextAreaWithLabel(label string, attr templ.Attributes, value string) {
 	@Label(label, label)
 	@TextArea(attr, value)
 }
+
+templ Select(attr templ.Attributes, options []string, selected string) {
+	<select {attr...} >
+	for _, option := range options {
+		if strings.EqualFold(option, selected) {
+			<option value={strings.ToLower(option)} selected>{option}</option>
+		} else {
+			<option value={strings.ToLower(option)}>{option}</option>
+		}
+	}
+	</select>
+}
+
+templ SelectWithLabel(label string, select_ templ.Component) {
+	@Label(label, label)
+	@select_
+}

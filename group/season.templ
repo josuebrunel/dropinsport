@@ -1,0 +1,82 @@
+package group
+
+import (
+    "fmt"
+    "time"
+    "github.com/josuebrunel/sportdropin/pkg/service"
+    "github.com/josuebrunel/sportdropin/pkg/view"
+    "github.com/josuebrunel/sportdropin/pkg/view/component"
+)
+
+templ GroupSeasonForm(r view.ViewData[service.Record], attr templ.Attributes) {
+    <form hx-target="#content" {attr...} >
+        @component.InputCSRF(view.Get[string](ctx, "csrf"))
+        <div class="grid">
+            @component.InputWithLabel("name",templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true})
+            @component.SelectWithLabel("status", component.Select(
+                templ.Attributes{"name": "status"},
+                []string{"Scheduled", "Inprogress", "Closed"},
+                r.V().GetString("status")),
+            )
+        </div>
+        <div class="grid">
+            @component.InputWithLabel(
+                "start date", templ.Attributes{
+                    "type": "date", "name": "start_date", 
+                    "id": "start_date",
+                    "value": r.V().GetDateTime("start_date").Time().Format(time.DateOnly) })
+            @component.InputWithLabel(
+                "end date", templ.Attributes{
+                    "type": "date", "name": "end_date", 
+                    "id": "end_date",
+                    "value": r.V().GetDateTime("end_date").Time().Format(time.DateOnly)})
+        </div>
+        @component.ButtonSubmit("Save", templ.Attributes{"value": "save", "class": "primary"})
+    </form>
+}
+
+templ GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) {
+    <h2>Seasons</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Start date</th>
+                    <th>End date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                for _, s := range gg.V() {
+                <tr>
+                    <td>{ s.GetString("name") }</td>
+                    <td>{ s.GetString("status") }</td>
+                    <td>{ s.GetDateTime("start_date").Time().Format(time.DateOnly) }</td>
+                    <td>{ s.GetDateTime("end_date").Time().Format(time.DateOnly) }</td>
+                    <td>
+                        <span class="actions">
+                            <i class="fas fa-edit button" 
+                                hx-get={ view.Reverse(ctx, "season.edit", groupID, s.GetId()) } 
+                                hx-target="#content">
+                            </i>
+                            <i class="fas fa-trash-alt"
+                                hx-target="#content"
+                                hx-delete={ view.Reverse(ctx, "season.delete", groupID, s.GetId()) } 
+                                hx-confirm="Do you really want to delete this season?"
+                                hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }>
+                            </i>
+                        </span>
+                    </td>
+                </tr>
+                }
+                <tr>
+                @component.Link("Add a season", "", templ.Attributes{
+                    "hx-get":  view.Reverse(ctx, "season.create", groupID),
+                    "hx-target": "#content",
+                    "role": "button",
+                })
+                </tr>
+            </tbody>
+        </table>
+}

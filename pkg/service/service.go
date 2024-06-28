@@ -1,9 +1,8 @@
-package group
+package service
 
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
@@ -15,16 +14,8 @@ import (
 type (
 	Record      = *models.Record
 	RecordSlice = []*models.Record
+	Request     = map[string]any
 )
-
-type Request struct {
-	UUID    string `json:"uuid" form:"uuid"`
-	Name    string `json:"name" form:"name"`
-	Sport   string `json:"sport" form:"sport"`
-	Street  string `json:"street" form:"street"`
-	City    string `json:"city" form:"city"`
-	Country string `json:"country" form:"country"`
-}
 
 type Service struct {
 	Name string
@@ -66,12 +57,9 @@ func (s Service) Create(ctx context.Context, req Request) (view.ViewData[Record]
 	}
 
 	record := models.NewRecord(collection)
-	record.Set("uuid", uuid.New().String())
-	record.Set("name", req.Name)
-	record.Set("sport", req.Sport)
-	record.Set("street", req.Street)
-	record.Set("city", req.City)
-	record.Set("country", req.Country)
+	for k, v := range req {
+		record.Set(k, v)
+	}
 
 	if err = s.db.SaveRecord(record); err != nil {
 		xlog.Error("error while inserting", "record", record, "error", err)
@@ -82,11 +70,11 @@ func (s Service) Create(ctx context.Context, req Request) (view.ViewData[Record]
 	return view.NewViewData(record, em), nil
 }
 
-func (s Service) Get(ctx context.Context, req Request) (view.ViewData[Record], error) {
+func (s Service) GetByID(ctx context.Context, id string) (view.ViewData[Record], error) {
 	em := errorsmap.New()
-	record, err := s.db.FindFirstRecordByData(s.Name, "uuid", req.UUID)
+	record, err := s.db.FindRecordById(s.Name, id)
 	if err != nil {
-		xlog.Error("error while getting", "record", req.UUID, "error", err)
+		xlog.Error("error while getting", "record", id, "error", err)
 		em["error"] = err
 		return view.NewViewData(s.GetNewRecord(), em), err
 	}
@@ -97,15 +85,16 @@ func (s Service) Get(ctx context.Context, req Request) (view.ViewData[Record], e
 	return view.NewViewData(record, em), nil
 }
 
-func findRecordsByExpr(name string, db *daos.Dao, filters dbx.HashExp) RecordSlice {
-	var records = RecordSlice{}
-	records, err := db.FindRecordsByExpr(name, dbx.NewExp("1={:one}", dbx.Params{"one": 1}), filters)
+func (s Service) GetByData(ctx context.Context, key string, value any) (view.ViewData[Record], error) {
+	em := errorsmap.New()
+	record, err := s.db.FindFirstRecordByData(s.Name, key, value)
 	if err != nil {
-		xlog.Error("error while finding records", "error", err)
-		return records
-	}
+		xlog.Error("error while getting record", "key", key, "value", value, "error", err)
+		em["error"] = err
+		return view.NewViewData(s.GetNewRecord(), em), err
 
-	return records
+	}
+	return view.NewViewData(record, em), nil
 }
 
 func (s Service) List(ctx context.Context, filters map[string]any) (view.ViewData[RecordSlice], error) {
@@ -122,25 +111,25 @@ func (s Service) List(ctx context.Context, filters map[string]any) (view.ViewDat
 		em["error"] = err
 		return view.NewViewData[RecordSlice](nil, em), err
 	}
-
 	return view.NewViewData(records, em), nil
 }
 
 func (s Service) Update(ctx context.Context, req Request) (view.ViewData[Record], error) {
 	em := errorsmap.New()
 
-	record, err := s.db.FindFirstRecordByData(s.Name, "uuid", req.UUID)
+	record, err := s.db.FindFirstRecordByData(s.Name, "id", req[s.ID])
 	if err != nil {
-		xlog.Error("error while getting", "record", req.UUID, "error", err)
+		xlog.Error("error while getting", "record", req[s.ID], "error", err)
 		em["error"] = err
 		return view.NewViewData(s.GetNewRecord(), em), err
 	}
 
-	record.Set("name", req.Name)
-	record.Set("sport", req.Sport)
-	record.Set("street", req.Street)
-	record.Set("city", req.City)
-	record.Set("country", req.Country)
+	for k, v := range req {
+		if k == s.ID {
+			continue
+		}
+		record.Set(k, v)
+	}
 
 	if err = s.db.SaveRecord(record); err != nil {
 		xlog.Error("error while updating", "record", record, "error", err)
@@ -151,12 +140,12 @@ func (s Service) Update(ctx context.Context, req Request) (view.ViewData[Record]
 	return view.NewViewData(record, em), err
 }
 
-func (s Service) Delete(ctx context.Context, req Request) error {
+func (s Service) Delete(ctx context.Context, id string) error {
 	em := errorsmap.New()
 
-	record, err := s.db.FindFirstRecordByData(s.Name, "uuid", req.UUID)
+	record, err := s.db.FindFirstRecordByData(s.Name, "id", id)
 	if err != nil {
-		xlog.Error("error while getting", "record", req.UUID, "error", err)
+		xlog.Error("error while getting", "record", id, "error", err)
 		em["error"] = err
 		return err
 	}
@@ -168,4 +157,15 @@ func (s Service) Delete(ctx context.Context, req Request) error {
 	}
 
 	return nil
+}
+
+func findRecordsByExpr(name string, db *daos.Dao, filters dbx.HashExp) RecordSlice {
+	var records = RecordSlice{}
+	records, err := db.FindRecordsByExpr(name, dbx.NewExp("1={:one}", dbx.Params{"one": 1}), filters)
+	if err != nil {
+		xlog.Error("error while finding records", "error", err)
+		return records
+	}
+
+	return records
 }

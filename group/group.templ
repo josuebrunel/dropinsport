@@ -50,10 +50,6 @@ templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
                 "value": "save", 
                 "class": "primary",
             })
-            /*@component.ButtonReset("Cancel", templ.Attributes{
-                "value": "cancel",
-                "class": "contrast",
-            })*/
             @component.ButtonSubmit("Delete", templ.Attributes{
                 "value": "delete",
                 "class": "secondary",
@@ -67,47 +63,49 @@ templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
 
 templ GroupListView(gg view.ViewData[RecordSlice]) {
     <div id="groups" hx-get={ view.Reverse(ctx, "group.list")} hx-trigger="groupChange from:body" hx-target="this">
-    if len(gg.V()) == 0 {
-        <p>No group found</p>
-    }
-    for _, g := range gg.V() {
-        <article>
-            <hgroup>
-                <h4>
-                    @component.Link(g.GetString("name"), "", templ.Attributes{
-                        "hx-get": view.Reverse(ctx, "group.get", g.GetString("uuid")),
-                        "hx-target": "#groups",
-                    })
-                </h4>
-                <small><em>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</em></small>
-                <hr />
-            </hgroup>
-            <p>{ g.GetString("description") }</p>
+        if len(gg.V()) == 0 {
+            <p>No group found</p>
+        }
+        for _, g := range gg.V() {
+            <article>
+                <hgroup>
+                    <h4>
+                        @component.Link(g.GetString("name"), "", templ.Attributes{
+                            "hx-get": view.Reverse(ctx, "group.get", g.GetString("uuid")),
+                            "hx-target": "#groups",
+                        })
+                    </h4>
+                    <small><em>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</em></small>
+                    <hr />
+                </hgroup>
+                <p>{ g.GetString("description") }</p>
 
-        </article>
-    }
-    @component.Link("Add a group", "", templ.Attributes{
-        "hx-get":  view.Reverse(ctx, "group.create"),
-        "hx-target": "#container",
-        "role": "button",
-    })
+            </article>
+        }
+        @component.Link("Add a group", "", templ.Attributes{
+            "hx-get":  view.Reverse(ctx, "group.create"),
+            "hx-target": "#container",
+            "role": "button",
+        })
     </div>
 }
 
 templ GroupDetailView(g view.ViewData[Record]) {
-    <article>
-        <header>
-            @component.Link(g.V().GetString("name"), view.Reverse(ctx, "group.get", g.V().GetString("uuid")), templ.Attributes{})
-        </header>
-        <div>
-            <p> { g.V().GetString("description") }</p>
-        </div>
-        <footer>
-            <small>
-                <span>{ g.V().GetString("street") }</span>
-                <span>{ g.V().GetString("city") }</span>
-                <span>{ g.V().GetString("country") }</span>
-            </small>
-        </footer>
-</article>
+    <section>
+        <h2>{ g.V().GetString("name") }</h2>
+        <p>{ g.V().GetString("description") }</p>
+    </section>
+    <section>
+        <nav>
+            <span role="group">
+                <a href="#stats" class="outline" role="button">Stats</a>
+                <a href="#members" class="outline" role="button">Members</a>
+                <a href="#seasons" role="button">Seasons</a>
+            </span>
+        </nav>
+    </section>
+    <section id="content">
+        @GroupSeasonList(g.V().GetString("uuid"), view.NewViewData(g.V().ExpandedAll("seasons"), nil))
+    </section>
 }
+
