@@ -44,84 +44,19 @@ func (a App) Run() {
 		g.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 			TokenLookup: "form:csrf,header:csrf",
 		}))
-		g.AddRoute(echo.Route{
-			Method:  http.MethodGet,
-			Path:    "",
-			Handler: groupHandler.List(ctx),
-			Name:    "group.list",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodGet,
-			Path:    "/:uuid",
-			Handler: groupHandler.Get(ctx),
-			Name:    "group.get",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodGet,
-			Path:    "/create",
-			Handler: groupHandler.Create(ctx),
-			Name:    "group.create",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodPost,
-			Path:    "/create",
-			Handler: groupHandler.Create(ctx),
-			Name:    "group.created",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodGet,
-			Path:    "/:uuid/edit",
-			Handler: groupHandler.Update(ctx),
-			Name:    "group.update",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodPatch,
-			Path:    "/:uuid/edit",
-			Handler: groupHandler.Update(ctx),
-			Name:    "group.update",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodDelete,
-			Path:    "/:uuid",
-			Handler: groupHandler.Delete(ctx),
-			Name:    "group.delete",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodGet,
-			Path:    "/:uuid/season/create",
-			Handler: groupHandler.SeasonCreate(ctx),
-			Name:    "season.create",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodPost,
-			Path:    "/:uuid/season/create",
-			Handler: groupHandler.SeasonCreate(ctx),
-			Name:    "season.created",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodGet,
-			Path:    "/:uuid/seasons",
-			Handler: groupHandler.SeasonList(ctx),
-			Name:    "season.list",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodGet,
-			Path:    "/:uuid/season/:seasonid/edit",
-			Handler: groupHandler.SeasonEdit(ctx),
-			Name:    "season.edit",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodPatch,
-			Path:    "/:uuid/season/:seasonid/edit",
-			Handler: groupHandler.SeasonEdit(ctx),
-			Name:    "season.edit",
-		})
-		g.AddRoute(echo.Route{
-			Method:  http.MethodDelete,
-			Path:    "/:uuid/season/:seasonid",
-			Handler: groupHandler.SeasonDelete(ctx),
-			Name:    "season.delete",
-		})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "", Handler: groupHandler.List(ctx), Name: "group.list"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid", Handler: groupHandler.Get(ctx), Name: "group.get"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/create", Handler: groupHandler.Create(ctx), Name: "group.create"})
+		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/create", Handler: groupHandler.Create(ctx), Name: "group.created"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/edit", Handler: groupHandler.Update(ctx), Name: "group.update"})
+		g.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/:groupid/edit", Handler: groupHandler.Update(ctx), Name: "group.update"})
+		g.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:groupid", Handler: groupHandler.Delete(ctx), Name: "group.delete"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/season/create", Handler: groupHandler.SeasonCreate(ctx), Name: "season.create"})
+		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/:groupid/season/create", Handler: groupHandler.SeasonCreate(ctx), Name: "season.created"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/seasons", Handler: groupHandler.SeasonList(ctx), Name: "season.list"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/season/:seasonid/edit", Handler: groupHandler.SeasonEdit(ctx), Name: "season.edit"})
+		g.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/:groupid/season/:seasonid/edit", Handler: groupHandler.SeasonEdit(ctx), Name: "season.edit"})
+		g.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:groupid/season/:seasonid", Handler: groupHandler.SeasonDelete(ctx), Name: "season.delete"})
 		return nil
 	})
 

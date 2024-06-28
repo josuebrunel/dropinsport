@@ -70,19 +70,34 @@ func (s Service) Create(ctx context.Context, req Request) (view.ViewData[Record]
 	return view.NewViewData(record, em), nil
 }
 
-func (s Service) GetByID(ctx context.Context, id string) (view.ViewData[Record], error) {
-	em := errorsmap.New()
+func (s Service) getByID(ctx context.Context, id string) (Record, error) {
 	record, err := s.db.FindRecordById(s.Name, id)
 	if err != nil {
 		xlog.Error("error while getting", "record", id, "error", err)
-		em["error"] = err
-		return view.NewViewData(s.GetNewRecord(), em), err
+		return s.GetNewRecord(), err
 	}
-	record.SetExpand(map[string]any{
-		"seasons": findRecordsByExpr("seasons", s.db, dbx.HashExp{"group": record.Id}),
-	})
+	return record, nil
+}
+
+func (s Service) GetByID(ctx context.Context, id string) (view.ViewData[Record], error) {
+	em := errorsmap.New()
+	record, err := s.getByID(ctx, id)
+	em["error"] = err
 	xlog.Debug("record", "record", record)
-	return view.NewViewData(record, em), nil
+	return view.NewViewData(record, em), err
+}
+
+func (s Service) GetByIDAndExpand(ctx context.Context, id string, expand map[string]map[string]any) (view.ViewData[Record], error) {
+	em := errorsmap.New()
+	record, err := s.getByID(ctx, id)
+	em["error"] = err
+	rels := map[string]any{}
+	for k, v := range expand {
+		rels[k] = s.FindRecordsByExpr(ctx, k, dbx.HashExp(v))
+	}
+	record.SetExpand(rels)
+	xlog.Debug("record", "record", record)
+	return view.NewViewData(record, em), err
 }
 
 func (s Service) GetByData(ctx context.Context, key string, value any) (view.ViewData[Record], error) {
@@ -159,13 +174,12 @@ func (s Service) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func findRecordsByExpr(name string, db *daos.Dao, filters dbx.HashExp) RecordSlice {
+func (s Service) FindRecordsByExpr(ctx context.Context, name string, filters dbx.HashExp) RecordSlice {
 	var records = RecordSlice{}
-	records, err := db.FindRecordsByExpr(name, dbx.NewExp("1={:one}", dbx.Params{"one": 1}), filters)
+	records, err := s.db.FindRecordsByExpr(name, dbx.NewExp("1={:one}", dbx.Params{"one": 1}), filters)
 	if err != nil {
 		xlog.Error("error while finding records", "error", err)
 		return records
 	}
-
 	return records
 }

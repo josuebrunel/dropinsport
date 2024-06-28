@@ -12,11 +12,12 @@ import "bytes"
 
 import (
 	"fmt"
+	"github.com/josuebrunel/sportdropin/pkg/service"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
 )
 
-func GroupFormView(r view.ViewData[Record], attr templ.Attributes) templ.Component {
+func GroupFormView(r view.ViewData[service.Record], attr templ.Attributes) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -134,7 +135,7 @@ func GroupFormView(r view.ViewData[Record], attr templ.Attributes) templ.Compone
 		templ_7745c5c3_Err = component.ButtonSubmit("Delete", templ.Attributes{
 			"value":      "delete",
 			"class":      "secondary",
-			"hx-delete":  view.Reverse(ctx, "group.delete", r.V().GetString("uuid")),
+			"hx-delete":  view.Reverse(ctx, "group.delete", r.V().GetId()),
 			"hx-confirm": "Do you really want to delete this group?",
 			"hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
 		}).Render(ctx, templ_7745c5c3_Buffer)
@@ -152,7 +153,7 @@ func GroupFormView(r view.ViewData[Record], attr templ.Attributes) templ.Compone
 	})
 }
 
-func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
+func GroupListView(gg view.ViewData[service.RecordSlice]) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -172,7 +173,7 @@ func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "group.list"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 65, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 66, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -194,7 +195,7 @@ func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = component.Link(g.GetString("name"), "", templ.Attributes{
-				"hx-get":    view.Reverse(ctx, "group.get", g.GetString("uuid")),
+				"hx-get":    view.Reverse(ctx, "group.get", g.GetId()),
 				"hx-target": "#groups",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -207,7 +208,7 @@ func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("street"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 78, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 79, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -220,7 +221,7 @@ func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("city"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 78, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 79, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -233,7 +234,7 @@ func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("country"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 78, Col: 107}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 79, Col: 107}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -246,7 +247,7 @@ func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(g.GetString("description"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 81, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 82, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -276,7 +277,7 @@ func GroupListView(gg view.ViewData[RecordSlice]) templ.Component {
 	})
 }
 
-func GroupDetailView(g view.ViewData[Record]) templ.Component {
+func GroupDetailView(g view.ViewData[service.Record]) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -296,7 +297,7 @@ func GroupDetailView(g view.ViewData[Record]) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(g.V().GetString("name"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 95, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 96, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -309,7 +310,7 @@ func GroupDetailView(g view.ViewData[Record]) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(g.V().GetString("description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 96, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/group.templ`, Line: 97, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -319,7 +320,7 @@ func GroupDetailView(g view.ViewData[Record]) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = GroupSeasonList(g.V().GetString("uuid"), view.NewViewData(g.V().ExpandedAll("seasons"), nil)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = GroupSeasonList(g.V().GetId(), view.NewViewData(g.V().ExpandedAll("seasons"), nil)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

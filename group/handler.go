@@ -29,19 +29,19 @@ func NewErrorResponse(err error) ErrorResponse {
 }
 
 type GroupHandler struct {
-	svc Service
+	svc service.Service
 }
 
 func NewGroupHandler(db *daos.Dao) *GroupHandler {
 	seasonSVC = service.NewService("seasons", "seasonid", db)
-	return &GroupHandler{svc: NewService("groups", "uuid", db)}
+	return &GroupHandler{svc: service.NewService("groups", "groupid", db)}
 }
 
 func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var (
 			err error
-			req = Request{}
+			req = service.Request{}
 		)
 		if ctx.Request().Method == http.MethodGet {
 			return view.Render(ctx, http.StatusOK, GroupFormView(
@@ -70,28 +70,27 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 
 func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		uuid := ctx.PathParam(h.svc.GetID())
-		xlog.Info("get", "group-uuid", uuid)
-		req := Request{UUID: uuid}
-		resp, err := h.svc.Get(context, req)
+		id := ctx.PathParam(h.svc.GetID())
+		xlog.Debug("get", "group-id", id)
+		resp, err := h.svc.GetByIDAndExpand(context, id, map[string]map[string]any{"seasons": map[string]any{"group": id}})
 		if err != nil {
-			xlog.Error("service", "error", err, "group", uuid)
+			xlog.Error("service", "error", err, "group", id)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		xlog.Info("get", "group", uuid)
+		xlog.Debug("get", "group", resp)
 		return view.Render(ctx, http.StatusOK, GroupDetailView(resp), nil)
 	}
 }
 
 func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		uuid := ctx.PathParam(h.svc.GetID())
+		id := ctx.PathParam(h.svc.GetID())
 		if ctx.Request().Method == http.MethodGet {
 			return view.Render(ctx, http.StatusOK, GroupFormView(
 				view.NewViewData(h.svc.GetNewRecord(), errorsmap.New()),
-				map[string]any{"hx-patch": reverse(ctx, "group.update", uuid)}), nil)
+				map[string]any{"hx-patch": reverse(ctx, "group.update", id)}), nil)
 		}
-		req := Request{UUID: uuid}
+		req := service.Request{"id": id}
 		if err := ctx.Bind(&req); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
@@ -103,7 +102,6 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
 		return view.Render(ctx, http.StatusOK, GroupListView(resp), nil)
 	}
 }
@@ -124,16 +122,14 @@ func (h GroupHandler) List(context context.Context) echo.HandlerFunc {
 
 func (h GroupHandler) Delete(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		uuid := ctx.PathParam(h.svc.GetID())
-		req := Request{UUID: uuid}
-		if err := h.svc.Delete(context, req); err != nil {
+		id := ctx.PathParam(h.svc.GetID())
+		if err := h.svc.Delete(context, id); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		resp, err := h.svc.List(context, map[string]any{})
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
 		return view.Render(ctx, http.StatusOK, GroupListView(resp), nil)
 
 	}
@@ -153,14 +149,13 @@ func (h GroupHandler) SeasonCreate(context context.Context) echo.HandlerFunc {
 		if err := ctx.Bind(&req); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		g, _ := h.svc.Get(context, Request{UUID: groupID})
-		req["group"] = g.V().GetId()
+		req["group"] = groupID
 		_, err := seasonSVC.Create(context, req)
 		if err != nil {
 			xlog.Error("error while creating season", "req", req, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		seasons, err := seasonSVC.List(context, map[string]any{"group": g.V().GetId()})
+		seasons, err := seasonSVC.List(context, map[string]any{"group": groupID})
 		if err != nil {
 			xlog.Error("error while getting seasons", "group", groupID, "error", err)
 		}
@@ -186,7 +181,6 @@ func (h GroupHandler) SeasonEdit(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		groupID := ctx.PathParam(h.svc.GetID())
 		seasonID := ctx.PathParam(seasonSVC.GetID())
-		g, _ := h.svc.Get(context, Request{UUID: groupID})
 		vd, _ := seasonSVC.GetByID(context, seasonID)
 		if ctx.Request().Method == http.MethodGet {
 			return view.Render(ctx, http.StatusOK,
@@ -198,13 +192,13 @@ func (h GroupHandler) SeasonEdit(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		req["id"] = seasonID
-		req["group"] = g.V().GetId()
+		req["group"] = groupID
 		_, err := seasonSVC.Update(context, req)
 		if err != nil {
 			xlog.Error("error while creating season", "req", req, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		seasons, err := seasonSVC.List(context, map[string]any{"group": g.V().GetId()})
+		seasons, err := seasonSVC.List(context, map[string]any{"group": groupID})
 		if err != nil {
 			xlog.Error("error while getting seasons", "group", groupID, "error", err)
 		}
@@ -221,8 +215,7 @@ func (h GroupHandler) SeasonDelete(context context.Context) echo.HandlerFunc {
 			xlog.Error("error while deleting season", "season", seasonID, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		g, _ := h.svc.Get(context, Request{UUID: groupID})
-		seasons, err := seasonSVC.List(context, map[string]any{"group": g.V().GetId()})
+		seasons, err := seasonSVC.List(context, map[string]any{"group": groupID})
 		if err != nil {
 			xlog.Error("error while getting seasons", "group", groupID, "error", err)
 		}

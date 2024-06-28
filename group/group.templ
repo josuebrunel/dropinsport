@@ -2,11 +2,12 @@ package group
 
 import (
     "fmt"
+    "github.com/josuebrunel/sportdropin/pkg/service"
     "github.com/josuebrunel/sportdropin/pkg/view"
     "github.com/josuebrunel/sportdropin/pkg/view/component"
 )
 
-templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
+templ GroupFormView(r view.ViewData[service.Record], attr templ.Attributes) {
     <article>
         <header>
             <a href="#close" aria-label="Close" class="close" data-target="group-modal" hx-get="#"
@@ -53,7 +54,7 @@ templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
             @component.ButtonSubmit("Delete", templ.Attributes{
                 "value": "delete",
                 "class": "secondary",
-                "hx-delete": view.Reverse(ctx, "group.delete", r.V().GetString("uuid")),
+                "hx-delete": view.Reverse(ctx, "group.delete", r.V().GetId()),
                 "hx-confirm": "Do you really want to delete this group?",
                 "hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
             })
@@ -61,7 +62,7 @@ templ GroupFormView(r view.ViewData[Record], attr templ.Attributes) {
     </article>
 }
 
-templ GroupListView(gg view.ViewData[RecordSlice]) {
+templ GroupListView(gg view.ViewData[service.RecordSlice]) {
     <div id="groups" hx-get={ view.Reverse(ctx, "group.list")} hx-trigger="groupChange from:body" hx-target="this">
         if len(gg.V()) == 0 {
             <p>No group found</p>
@@ -71,7 +72,7 @@ templ GroupListView(gg view.ViewData[RecordSlice]) {
                 <hgroup>
                     <h4>
                         @component.Link(g.GetString("name"), "", templ.Attributes{
-                            "hx-get": view.Reverse(ctx, "group.get", g.GetString("uuid")),
+                            "hx-get": view.Reverse(ctx, "group.get", g.GetId()),
                             "hx-target": "#groups",
                         })
                     </h4>
@@ -90,7 +91,7 @@ templ GroupListView(gg view.ViewData[RecordSlice]) {
     </div>
 }
 
-templ GroupDetailView(g view.ViewData[Record]) {
+templ GroupDetailView(g view.ViewData[service.Record]) {
     <section>
         <h2>{ g.V().GetString("name") }</h2>
         <p>{ g.V().GetString("description") }</p>
@@ -105,7 +106,7 @@ templ GroupDetailView(g view.ViewData[Record]) {
         </nav>
     </section>
     <section id="content">
-        @GroupSeasonList(g.V().GetString("uuid"), view.NewViewData(g.V().ExpandedAll("seasons"), nil))
+        @GroupSeasonList(g.V().GetId(), view.NewViewData(g.V().ExpandedAll("seasons"), nil))
     </section>
 }
 
