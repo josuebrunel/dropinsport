@@ -112,7 +112,7 @@ func (s Service) GetByData(ctx context.Context, key string, value any) (view.Vie
 	return view.NewViewData(record, em), nil
 }
 
-func (s Service) List(ctx context.Context, filters map[string]any) (view.ViewData[RecordSlice], error) {
+func (s Service) List(ctx context.Context, filters map[string]any, expand ...string) (view.ViewData[RecordSlice], error) {
 	em := errorsmap.New()
 
 	hashExp := dbx.HashExp{}
@@ -125,6 +125,11 @@ func (s Service) List(ctx context.Context, filters map[string]any) (view.ViewDat
 		xlog.Error("error while listing records", "error", err)
 		em["error"] = err
 		return view.NewViewData[RecordSlice](nil, em), err
+	}
+	if len(expand) > 0 {
+		for _, r := range records {
+			s.db.ExpandRecord(r, expand, nil)
+		}
 	}
 	return view.NewViewData(records, em), nil
 }

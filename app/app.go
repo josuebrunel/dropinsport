@@ -51,12 +51,20 @@ func (a App) Run() {
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/edit", Handler: groupHandler.Update(ctx), Name: "group.update"})
 		g.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/:groupid/edit", Handler: groupHandler.Update(ctx), Name: "group.update"})
 		g.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:groupid", Handler: groupHandler.Delete(ctx), Name: "group.delete"})
+		// SEASONS
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/season/create", Handler: groupHandler.SeasonCreate(ctx), Name: "season.create"})
 		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/:groupid/season/create", Handler: groupHandler.SeasonCreate(ctx), Name: "season.created"})
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/seasons", Handler: groupHandler.SeasonList(ctx), Name: "season.list"})
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/season/:seasonid/edit", Handler: groupHandler.SeasonEdit(ctx), Name: "season.edit"})
 		g.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/:groupid/season/:seasonid/edit", Handler: groupHandler.SeasonEdit(ctx), Name: "season.edit"})
 		g.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:groupid/season/:seasonid", Handler: groupHandler.SeasonDelete(ctx), Name: "season.delete"})
+		// MEMBERS
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/member/create", Handler: groupHandler.MemberCreate(ctx), Name: "member.create"})
+		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/:groupid/member/create", Handler: groupHandler.MemberCreate(ctx), Name: "member.created"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/members", Handler: groupHandler.MemberList(ctx), Name: "member.list"})
+		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/member/:memberid/edit", Handler: groupHandler.MemberEdit(ctx), Name: "member.edit"})
+		g.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/:groupid/member/:memberid/edit", Handler: groupHandler.MemberEdit(ctx), Name: "member.edit"})
+		g.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:groupid/member/:memberid", Handler: groupHandler.MemberDelete(ctx), Name: "member.delete"})
 		return nil
 	})
 
