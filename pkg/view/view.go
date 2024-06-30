@@ -29,7 +29,6 @@ func NewViewData[T any](data T, errs map[string]error) ViewData[T] {
 func Render(ctx echo.Context, status int, tpl templ.Component, data any) error {
 	ctx.Response().Writer.WriteHeader(status)
 
-	//csrf := ctx.Get(middleware.DefaultCSRFConfig.ContextKey).(string)
 	var csrf string
 	if v := ctx.Get("csrf"); v != nil {
 		csrf = v.(string)

@@ -100,7 +100,7 @@ templ GroupDetailView(g view.ViewData[service.Record]) {
         <nav>
             <span role="group">
                 <a href="#stats" class="outline" role="button" 
-                    hx-target="#content" hx-get={ view.Reverse(ctx, "member.list", g.V().GetId())}>Stats</a>
+                    hx-target="#content" hx-get={ view.Reverse(ctx, "stat.list", g.V().GetId())}>Stats</a>
                 <a href="#members" class="outline" role="button"
                     hx-target="#content" hx-get={ view.Reverse(ctx, "member.list", g.V().GetId())}>Members</a>
                 <a href="#seasons" class="outline" role="button"

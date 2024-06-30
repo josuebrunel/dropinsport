@@ -3,6 +3,7 @@ package group
 import (
 	"context"
 	"net/http"
+	"sort"
 
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
 	"github.com/josuebrunel/sportdropin/pkg/service"
@@ -13,20 +14,25 @@ import (
 	"github.com/pocketbase/pocketbase/daos"
 )
 
-const hx_trigger_group = "groupChange"
+const (
+	SeasonStatusInProgress = "inprogress"
+	SeasonStatusClosed     = "closed"
+	SeasonStatusScheduled  = "scheduled"
+)
 
 var (
 	seasonSVC service.Service
 	memberSVC service.Service
+	statSVC   service.Service
 )
 
-type ErrorResponse struct {
-	Error string
-}
-
-func NewErrorResponse(err error) ErrorResponse {
-	return ErrorResponse{Error: err.Error()}
-}
+type (
+	SportStatSchema = []map[string]string
+	SportMetaData   struct {
+		Icon  string          `json:"icon"`
+		Stats SportStatSchema `json:"stats"`
+	}
+)
 
 type GroupHandler struct {
 	svc service.Service
@@ -35,7 +41,44 @@ type GroupHandler struct {
 func NewGroupHandler(db *daos.Dao) *GroupHandler {
 	seasonSVC = service.NewService("seasons", "seasonid", db)
 	memberSVC = service.NewService("members", "memberid", db)
+	statSVC = service.NewService("memberstats", "statid", db)
 	return &GroupHandler{svc: service.NewService("groups", "groupid", db)}
+}
+
+func (h GroupHandler) GetGroupSportStatSchema(ctx context.Context, groupID string) SportStatSchema {
+	group, err := h.svc.GetByID(ctx, groupID, "sport")
+	if err != nil {
+		return SportStatSchema{}
+	}
+	var md SportMetaData
+	sport := group.Data.ExpandedOne("sport")
+	sport.UnmarshalJSONField("data", &md)
+	xlog.Debug("schema", "schema", md)
+	return md.Stats
+}
+
+func (h GroupHandler) GetGroupCurrentSeason(ctx context.Context, groupID string) (service.Record, error) {
+	seasons, err := seasonSVC.List(ctx, map[string]any{"group": groupID})
+	if err != nil {
+		return seasonSVC.GetNewRecord(), err
+	}
+	if len(seasons.Data) == 0 {
+		return nil, nil
+	}
+	sort.Slice(seasons.Data, func(i, j int) bool {
+		return seasons.Data[i].GetString("end_date") < seasons.Data[j].GetString("end_date")
+	})
+	var currentSeason service.Record
+	for _, season := range seasons.Data {
+		if season.GetString("status") == SeasonStatusInProgress {
+			currentSeason = season
+			break
+		}
+	}
+	if currentSeason == nil {
+		currentSeason = seasons.Data[0]
+	}
+	return currentSeason, nil
 }
 
 func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
@@ -62,7 +105,6 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		ctx.Response().Header().Set("HX-Trigger", hx_trigger_group)
 		return view.Render(ctx, http.StatusOK, GroupListView(resp), nil)
 
 	}
@@ -73,7 +115,7 @@ func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		id := ctx.PathParam(h.svc.GetID())
 		xlog.Debug("get", "group-id", id)
-		resp, err := h.svc.GetByIDAndExpand(context, id, map[string]map[string]any{"seasons": map[string]any{"group": id}})
+		resp, err := h.svc.GetByIDWithBackRel(context, id, service.BackRel{"seasons": map[string]any{"group": id}})
 		if err != nil {
 			xlog.Error("service", "error", err, "group", id)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)

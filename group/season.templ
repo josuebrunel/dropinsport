@@ -15,7 +15,11 @@ templ GroupSeasonForm(r view.ViewData[service.Record], attr templ.Attributes) {
             @component.InputWithLabel("name",templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true})
             @component.SelectWithLabel("status", component.Select(
                 templ.Attributes{"name": "status"},
-                []string{"Scheduled", "Inprogress", "Closed"},
+                map[string]string{
+                    "Scheduled": "scheduled", 
+                    "Inprogress": "inprogress", 
+                    "Closed": "closed",
+                },
                 r.V().GetString("status")),
             )
         </div>

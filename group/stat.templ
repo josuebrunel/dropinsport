@@ -1,0 +1,78 @@
+package group
+
+import (
+    "fmt"
+    "github.com/josuebrunel/sportdropin/pkg/view"
+    "github.com/josuebrunel/sportdropin/pkg/view/component"
+)
+
+
+func genFieldName(prefix, value string) string {
+    return fmt.Sprintf("%s:%s", prefix, value)
+}
+
+templ GroupStatForm(schema SportStatSchema, members []map[string]string, attr templ.Attributes) {
+    <form {attr...} >
+        @component.InputCSRF(view.Get[string](ctx, "csrf"))
+        <table>
+            <thead>
+                <tr>
+                    <th>Nickname</th>
+                    for _, field := range schema  {
+                        <th><abbr title={field["name"]}>{field["abbr"]}</abbr></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                for _, m := range members {
+                    <tr>
+                        <td>
+                            {m["username"]}@component.InputHidden(genFieldName(m["id"], "member"), m["id"])
+                            @component.InputHidden(genFieldName(m["id"], "id"), m["stats_id"])
+                        </td>    
+                        for _, f := range schema {
+                            <td>@component.Input(templ.Attributes{
+                                "name": genFieldName(m["id"], f["abbr"]),
+                                "type": f["type"],
+                                "value": m[f["abbr"]],
+                                "step": 1,
+                            })
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @component.ButtonSubmit("Save", templ.Attributes{"value": "save", "class": "primary"})
+    </form>
+}
+
+templ GroupStatList(groupID string, stats []map[string]string, schema SportStatSchema) {
+    <table>
+        <thead>
+            <tr>
+                <th>Nickname</th>
+                for _, field := range schema  {
+                    <th><abbr title={field["name"]}>{field["abbr"]}</abbr></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            for _, m := range stats {
+            <tr>
+                <td>{m["username"]}</td>    
+                for _, f := range schema {
+                    <td>{m[f["abbr"]]}</td>
+                }
+            </tr>
+            }
+            <tr>
+                @component.Link("Edit stats", "", templ.Attributes{
+                    "hx-get":  view.Reverse(ctx, "stat.create", groupID),
+                    "hx-target": "#content",
+                    "role": "button",
+                })
+            </tr>
+        </tbody>
+</table>
+}

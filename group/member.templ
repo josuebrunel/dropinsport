@@ -20,7 +20,7 @@ templ GroupMemberForm(r view.ViewData[service.Record], attr templ.Attributes) {
             "value": r.V().GetString("email"),
         })
         @component.InputWithLabel("Phone",templ.Attributes{
-            "type": "text", "name": "phone", 
+            "type": "tel", "name": "phone", 
             "value": r.V().GetString("phone"),
         })   
         @component.ButtonSubmit("Save", templ.Attributes{"value": "save", "class": "primary"})
