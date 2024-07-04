@@ -32,11 +32,11 @@ test:
 templ:
 	templ generate
 
-debug: dev.build
-	dlv --listen=:4000 --headless=true --log=true --accept-multiclient --api-version=2 exec ${BIN} -- --dev serve --http="0.0.0.0:8080"
+debug.build: build
+	go build -gcflags "all=-N -l" -ldflags="-compressdwarf=false" -o ${BIN} ${MAIN}
 
-dev.build: build
-	go build -gcflags "all=-N -l" -o ${BIN} ${MAIN}
+debug: debug.build
+	dlv --listen=:4000 --headless=true --log=true --accept-multiclient --api-version=2 exec ${BIN} -- --dir ${PBDIR} --dev serve --http="0.0.0.0:8080"
 
 build: templ
 	go build -o ${BIN} ${MAIN}
