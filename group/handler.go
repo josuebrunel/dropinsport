@@ -155,7 +155,7 @@ func (h GroupHandler) List(context context.Context) echo.HandlerFunc {
 		if city := c.QueryParam("search"); city != "" {
 			filters["city"] = city
 		}
-		resp, err := h.svc.List(context, filters)
+		resp, err := h.svc.List(context, filters, "sport")
 		if err != nil {
 			return view.Render(c, http.StatusOK, component.Error(err.Error()), nil)
 		}

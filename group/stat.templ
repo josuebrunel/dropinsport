@@ -12,6 +12,7 @@ func genFieldName(prefix, value string) string {
 }
 
 templ GroupStatForm(schema SportStatSchema, members []map[string]string, attr templ.Attributes) {
+    <h3>Stats</h3>
     <form {attr...} >
         @component.InputCSRF(view.Get[string](ctx, "csrf"))
         <table>
@@ -48,6 +49,10 @@ templ GroupStatForm(schema SportStatSchema, members []map[string]string, attr te
 }
 
 templ GroupStatList(groupID string, stats []map[string]string, schema SportStatSchema) {
+    <h3>
+        Stats 
+        <i class="fa-regular fa-pen-to-square button" hx-get={view.Reverse(ctx, "stat.create", groupID)} hx-target="#content" role="button"></i>
+    </h3>
     <table>
         <thead>
             <tr>
@@ -60,19 +65,12 @@ templ GroupStatList(groupID string, stats []map[string]string, schema SportStatS
         <tbody>
             for _, m := range stats {
             <tr>
-                <td>{m["username"]}</td>    
+                <td><i class="fa-regular fa-user"></i> {m["username"]}</td>    
                 for _, f := range schema {
                     <td>{m[f["abbr"]]}</td>
                 }
             </tr>
             }
-            <tr>
-                @component.Link("Edit stats", "", templ.Attributes{
-                    "hx-get":  view.Reverse(ctx, "stat.create", groupID),
-                    "hx-target": "#content",
-                    "role": "button",
-                })
-            </tr>
         </tbody>
 </table>
 }

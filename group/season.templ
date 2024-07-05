@@ -9,7 +9,13 @@ import (
 )
 
 templ GroupSeasonForm(r view.ViewData[service.Record], attr templ.Attributes) {
+    <h3> Seasons </h3>
     <form hx-target="#content" {attr...} >
+        if r.V().GetId() == "" {
+            <h5>Add a season </h5>
+        } else {
+            <h5>Edit season {r.V().GetString("name")} </h5>
+        }   
         @component.InputCSRF(view.Get[string](ctx, "csrf"))
         <div class="grid">
             @component.InputWithLabel("name",templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true})
@@ -40,7 +46,10 @@ templ GroupSeasonForm(r view.ViewData[service.Record], attr templ.Attributes) {
 }
 
 templ GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) {
-    <h2>Seasons</h2>
+    <h3>
+        Seasons 
+        <i class="fa-solid fa-calendar-plus button" hx-get={view.Reverse(ctx, "season.create", groupID)} hx-target="#content" role="button"></i>
+    </h3>
         <table>
             <thead>
                 <tr>
@@ -60,11 +69,11 @@ templ GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) {
                     <td>{ s.GetDateTime("end_date").Time().Format(time.DateOnly) }</td>
                     <td>
                         <span class="actions">
-                            <i class="fas fa-edit button" 
+                            <i class="fas fa-edit button outline" role="button"
                                 hx-get={ view.Reverse(ctx, "season.edit", groupID, s.GetId()) } 
                                 hx-target="#content">
                             </i>
-                            <i class="fas fa-trash-alt"
+                            <i class="fas fa-trash-alt outline" role="button" style="color:red;" 
                                 hx-target="#content"
                                 hx-delete={ view.Reverse(ctx, "season.delete", groupID, s.GetId()) } 
                                 hx-confirm="Do you really want to delete this season?"
@@ -74,13 +83,6 @@ templ GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) {
                     </td>
                 </tr>
                 }
-                <tr>
-                @component.Link("Add a season", "", templ.Attributes{
-                    "hx-get":  view.Reverse(ctx, "season.create", groupID),
-                    "hx-target": "#content",
-                    "role": "button",
-                })
-                </tr>
             </tbody>
         </table>
 }

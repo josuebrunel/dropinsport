@@ -8,7 +8,13 @@ import (
 )
 
 templ GroupMemberForm(r view.ViewData[service.Record], attr templ.Attributes) {
+    <h3>Members</h3>
     <form hx-target="#content" {attr...} >
+        if r.V().GetId() == "" {
+            <h5>Add a member </h5>
+        } else {
+            <h5>Edit member {r.V().GetString("username")} </h5>
+        }
         @component.InputCSRF(view.Get[string](ctx, "csrf"))
         @component.InputWithLabel("Nickname",templ.Attributes{
             "type": "text", "name": "username", 
@@ -28,7 +34,10 @@ templ GroupMemberForm(r view.ViewData[service.Record], attr templ.Attributes) {
 }
 
 templ GroupMemberList(groupID string, mm view.ViewData[service.RecordSlice]) {
-    <h2>Members</h2>
+    <h3>
+        Members 
+        <i class="fa-solid fa-user-plus button" hx-get={view.Reverse(ctx, "member.create", groupID)} hx-target="#content" role="button"></i>
+    </h3>
     <table>
         <thead>
             <tr>
@@ -41,16 +50,19 @@ templ GroupMemberList(groupID string, mm view.ViewData[service.RecordSlice]) {
         <tbody>
             for _, m := range mm.V() {
             <tr>
-                <td>{ m.GetString("username") }</td>
+                <td><i class="fa-regular fa-user"></i> { m.GetString("username") }</td>
                 <td>{ m.GetString("email") }</td>
                 <td>{ m.GetString("phone") }</td>
                 <td>
                     <span class="actions">
-                        <i class="fas fa-edit button" 
+                        <i class="fas fa-edit button outline" 
+                            role="button"
                             hx-get={ view.Reverse(ctx, "member.edit", groupID, m.GetId()) } 
                             hx-target="#content">
                         </i>
-                        <i class="fas fa-trash-alt"
+                        <i class="fas fa-trash-alt button outline"
+                            role="button"
+                            style="color:red;"
                             hx-target="#content"
                             hx-delete={ view.Reverse(ctx, "member.delete", groupID, m.GetId()) } 
                             hx-confirm="Do you really want to delete this member?"
@@ -60,13 +72,6 @@ templ GroupMemberList(groupID string, mm view.ViewData[service.RecordSlice]) {
                 </td>
             </tr>
             }
-            <tr>
-            @component.Link("Add a member", "", templ.Attributes{
-                "hx-get":  view.Reverse(ctx, "member.create", groupID),
-                "hx-target": "#content",
-                "role": "button",
-            })
-            </tr>
         </tbody>
     </table>
 }
