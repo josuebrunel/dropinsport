@@ -5,6 +5,7 @@ import (
     "github.com/josuebrunel/sportdropin/pkg/service"
     "github.com/josuebrunel/sportdropin/pkg/view"
     "github.com/josuebrunel/sportdropin/pkg/view/component"
+    "github.com/josuebrunel/sportdropin/pkg/view/base"
 )
 
 templ GroupFormView(r view.ViewData[service.Record], attr templ.Attributes) {
@@ -70,10 +71,11 @@ templ GroupListView(gg view.ViewData[service.RecordSlice]) {
         for _, g := range gg.V() {
             <article>
                 <h3>
-                    @component.Link(g.GetString("name"), "", templ.Attributes{
+                    @component.Link(g.GetString("name"), view.Reverse(ctx, "group.get", g.GetId()), templ.Attributes{})
+                    /*@component.Link(g.GetString("name"), "", templ.Attributes{
                         "hx-get": view.Reverse(ctx, "group.get", g.GetId()),
                         "hx-target": "#groups",
-                    })
+                    })*/
                 </h3>
                 <p><i>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</i></p>
                 <p>{ g.GetString("description") }</p>
@@ -88,29 +90,36 @@ templ GroupListView(gg view.ViewData[service.RecordSlice]) {
 }
 
 templ GroupDetailView(g view.ViewData[service.Record]) {
-    <section>
-        <h2>{ g.V().GetString("name") }</h2>
-        <p>{ g.V().GetString("description") }</p>
-    </section>
-    <section>
-        <nav>
-            <span role="group">
-                <a href="#stats" class="outline" role="button" 
-                    hx-target="#content" hx-get={ view.Reverse(ctx, "stat.list", g.V().GetId())}>
-                    <i class="fa-regular fa-chart-bar"></i> Stats
-                </a>
-                    
-                <a href="#members" class="outline" role="button"
-                    hx-target="#content" hx-get={ view.Reverse(ctx, "member.list", g.V().GetId())}>
-                    <i class="fa-solid fa-users"></i> Members
-                </a>
-                <a href="#seasons" class="outline" role="button"
-                    hx-target="#content" hx-get={ view.Reverse(ctx, "season.list", g.V().GetId())}>
-                    <i class="fa-solid fa-calendar-days"></i> Seasons
-                </a>
-            </span>
-        </nav>
-    </section>
-    <section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.V().GetId())} hx-target="#content"></section>
+    @base.Head(g.V().GetString("name"))
+    @base.Body() {
+        @base.Main(templ.Attributes{}) {
+            <section>
+                <h2>{ g.V().GetString("name") }</h2>
+                <p>{ g.V().GetString("description") }</p>
+            </section>
+            <section>
+                <nav>
+                    <span role="group">
+                        <a href="#stats" class="outline" role="button" 
+                            hx-target="#content" hx-get={ view.Reverse(ctx, "stat.list", g.V().GetId())}>
+                            <i class="fa-regular fa-chart-bar"></i> Stats
+                        </a>
+                                
+                        <a href="#members" class="outline" role="button"
+                            hx-target="#content" hx-get={ view.Reverse(ctx, "member.list", g.V().GetId())}>
+                            <i class="fa-solid fa-users"></i> Members
+                        </a>
+                        <a href="#seasons" class="outline" role="button"
+                            hx-target="#content" hx-get={ view.Reverse(ctx, "season.list", g.V().GetId())}>
+                            <i class="fa-solid fa-calendar-days"></i> Seasons
+                        </a>
+                    </span>
+                </nav>
+            </section>
+            <section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.V().GetId())} hx-target="#content"></section>
+        }
+        @base.Footer()
+        @base.Scripts()
+    }
 }
 
