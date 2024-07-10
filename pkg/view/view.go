@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"net/http"
+	"net/url"
 
 	"github.com/a-h/templ"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
@@ -66,4 +67,26 @@ func Reverse(cx context.Context, name string, values ...any) string {
 		xlog.Error("failed to reverse route", "name", name, "values", values, "error", err)
 	}
 	return path
+}
+
+func ReverseX(c echo.Context, name string, values ...any) string {
+	path, err := c.Echo().Router().Routes().Reverse(name, values...)
+	if err != nil {
+		xlog.Error("error while reversing route", "name", name, "values", values, "error", err)
+	}
+	return path
+}
+
+func WithQS(url_ string, qs map[string]string) string {
+	u, err := url.Parse(url_)
+	if err != nil {
+		xlog.Error("failed to parse url", "url", url_, "error", err)
+		return url_
+	}
+	q := u.Query()
+	for k, v := range qs {
+		q.Set(k, v)
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
 }
