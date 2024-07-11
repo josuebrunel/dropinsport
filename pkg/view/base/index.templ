@@ -24,14 +24,19 @@ templ Header() {
 				</li>
 			</ul>
 			<ul>
-				<li>
-					<form role="search" hx-get="/group" hx-trigger="click" hx-target="#container">
-						<input type="search" name="search" id="search" placeholder="Search"/>
-						<input type="submit" value="Search"/>
-					</form>
-				</li>
+				<details class="dropdown">
+					<summary> <i class="fa-solid fa-bars"></i> </summary>
+					<ul>
+						<li><a href="/account/login">Sign in</a></li>
+						<li><a href="/account/register">Sign up</a></li>
+					</ul>
+				</details>
 			</ul>
 		</nav>
+		<form role="search" hx-get="/group" hx-trigger="click" hx-target="#container">
+			<input type="search" name="search" id="search" placeholder="Search"/>
+			<input type="submit" value="Search"/>
+		</form>
 		<hr/>
 	</header>
 }

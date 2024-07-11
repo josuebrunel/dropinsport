@@ -99,7 +99,7 @@ func Header() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"container\"><nav><ul><li><h2><a href=\"/\"><strong>SPORTIX</strong></a></h2></li></ul><ul><li><form role=\"search\" hx-get=\"/group\" hx-trigger=\"click\" hx-target=\"#container\"><input type=\"search\" name=\"search\" id=\"search\" placeholder=\"Search\"> <input type=\"submit\" value=\"Search\"></form></li></ul></nav><hr></header>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"container\"><nav><ul><li><h2><a href=\"/\"><strong>SPORTIX</strong></a></h2></li></ul><ul><details class=\"dropdown\"><summary><i class=\"fa-solid fa-bars\"></i></summary><ul><li><a href=\"/account/login\">Sign in</a></li><li><a href=\"/account/register\">Sign up</a></li></ul></details></ul></nav><form role=\"search\" hx-get=\"/group\" hx-trigger=\"click\" hx-target=\"#container\"><input type=\"search\" name=\"search\" id=\"search\" placeholder=\"Search\"> <input type=\"submit\" value=\"Search\"></form><hr></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

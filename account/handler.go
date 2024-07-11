@@ -13,7 +13,6 @@ import (
 	pb "github.com/josuebrunel/sportdropin/pkg/pbclient"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
-	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/josuebrunel/sportdropin/pkg/xsession"
 	"github.com/labstack/echo/v5"
 )
@@ -188,7 +187,6 @@ func (a AccountHandler) Groups(cx context.Context) echo.HandlerFunc {
 			return view.Render(c, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		user := pb.ResponseTo[models.UserExpandGroup](resp)
-		xlog.Debug("data", "user", user)
 		return view.Render(c, http.StatusOK, GroupListView(user.Expand.GroupsViaUser, templ.Attributes{}), nil)
 	}
 }

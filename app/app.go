@@ -82,10 +82,8 @@ func (a App) Run() {
 		a.AddRoute(echo.Route{Method: http.MethodPost, Path: "/login", Handler: accountHandler.Login(ctx), Name: "account.login"})
 		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:accountid", Handler: accountHandler.Get(ctx), Name: "account.get",
 			Middlewares: []echo.MiddlewareFunc{xsession.LoginRequired}})
-		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/register", Handler: accountHandler.Create(ctx), Name: "account.register",
-			Middlewares: []echo.MiddlewareFunc{xsession.LoginRequired}})
-		a.AddRoute(echo.Route{Method: http.MethodPost, Path: "/register", Handler: accountHandler.Create(ctx), Name: "account.register",
-			Middlewares: []echo.MiddlewareFunc{xsession.LoginRequired}})
+		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/register", Handler: accountHandler.Create(ctx), Name: "account.register"})
+		a.AddRoute(echo.Route{Method: http.MethodPost, Path: "/register", Handler: accountHandler.Create(ctx), Name: "account.register"})
 		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:accountid/edit", Handler: accountHandler.Update(ctx), Name: "account.update",
 			Middlewares: []echo.MiddlewareFunc{xsession.LoginRequired}})
 		a.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/:accountid/edit", Handler: accountHandler.Update(ctx), Name: "account.update",
