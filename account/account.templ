@@ -126,7 +126,7 @@ templ GroupListView(gg []models.Group, attr templ.Attributes) {
         Groups 
         <i class="fa-solid fa-user-plus button" hx-get={view.Reverse(ctx, "group.create")} hx-target="#content" role="button"></i>
     </h3>
-    <table>
+    @component.Table() {
         <thead>
             <tr>
                 <th>Name</th>
@@ -165,5 +165,5 @@ templ GroupListView(gg []models.Group, attr templ.Attributes) {
             </tr>
             }
         </tbody>
-    </table>
+    }
 }

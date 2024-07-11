@@ -38,7 +38,7 @@ templ GroupMemberList(groupID string, mm view.ViewData[service.RecordSlice]) {
         Members 
         <i class="fa-solid fa-user-plus button" hx-get={view.Reverse(ctx, "member.create", groupID)} hx-target="#content" role="button"></i>
     </h3>
-    <table>
+    @component.Table() {
         <thead>
             <tr>
                 <th>Nickname</th>
@@ -73,5 +73,5 @@ templ GroupMemberList(groupID string, mm view.ViewData[service.RecordSlice]) {
             </tr>
             }
         </tbody>
-    </table>
+    }
 }

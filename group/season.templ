@@ -50,39 +50,39 @@ templ GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) {
         Seasons 
         <i class="fa-solid fa-calendar-plus button" hx-get={view.Reverse(ctx, "season.create", groupID)} hx-target="#content" role="button"></i>
     </h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Start date</th>
-                    <th>End date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                for _, s := range gg.V() {
-                <tr>
-                    <td>{ s.GetString("name") }</td>
-                    <td>{ s.GetString("status") }</td>
-                    <td>{ s.GetDateTime("start_date").Time().Format(time.DateOnly) }</td>
-                    <td>{ s.GetDateTime("end_date").Time().Format(time.DateOnly) }</td>
-                    <td>
-                        <span class="actions">
-                            <i class="fas fa-edit button outline" role="button"
-                                hx-get={ view.Reverse(ctx, "season.edit", groupID, s.GetId()) } 
-                                hx-target="#content">
-                            </i>
-                            <i class="fas fa-trash-alt outline" role="button" style="color:red;" 
-                                hx-target="#content"
-                                hx-delete={ view.Reverse(ctx, "season.delete", groupID, s.GetId()) } 
-                                hx-confirm="Do you really want to delete this season?"
-                                hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }>
-                            </i>
-                        </span>
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
+    @component.Table() {
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            for _, s := range gg.V() {
+            <tr>
+                <td>{ s.GetString("name") }</td>
+                <td>{ s.GetString("status") }</td>
+                <td>{ s.GetDateTime("start_date").Time().Format(time.DateOnly) }</td>
+                <td>{ s.GetDateTime("end_date").Time().Format(time.DateOnly) }</td>
+                <td>
+                    <span class="actions">
+                        <i class="fas fa-edit button outline" role="button"
+                            hx-get={ view.Reverse(ctx, "season.edit", groupID, s.GetId()) } 
+                            hx-target="#content">
+                        </i>
+                        <i class="fas fa-trash-alt outline" role="button" style="color:red;" 
+                            hx-target="#content"
+                            hx-delete={ view.Reverse(ctx, "season.delete", groupID, s.GetId()) } 
+                            hx-confirm="Do you really want to delete this season?"
+                            hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }>
+                        </i>
+                    </span>
+                </td>
+            </tr>
+            }
+        </tbody>
+    }
 }
