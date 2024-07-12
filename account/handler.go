@@ -187,6 +187,6 @@ func (a AccountHandler) Groups(cx context.Context) echo.HandlerFunc {
 			return view.Render(c, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		user := pb.ResponseTo[models.UserExpandGroup](resp)
-		return view.Render(c, http.StatusOK, GroupListView(user.Expand.GroupsViaUser, templ.Attributes{}), nil)
+		return view.Render(c, http.StatusOK, GroupListView(user.Expand.Groups, templ.Attributes{}), nil)
 	}
 }

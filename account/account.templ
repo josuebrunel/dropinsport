@@ -140,7 +140,7 @@ templ GroupListView(gg []models.Group, attr templ.Attributes) {
         <tbody>
             for _, g := range gg {
             <tr>
-                <td>{ g.Name }</td>
+                <td><strong>@component.Link(g.Name, view.Reverse(ctx, "group.get", g.ID), templ.Attributes{})</strong></td>
                 <td>{ g.Street }</td>
                 <td>{ g.City }</td>
                 <td>{ g.Country }</td>

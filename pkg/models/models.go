@@ -25,7 +25,7 @@ type User struct {
 type UserExpandGroup struct {
 	User
 	Expand struct {
-		GroupsViaUser []Group `json:"groups_via_user"`
+		Groups []Group `json:"groups_via_user"`
 	} `json:"expand,omitempty"`
 }
 
@@ -64,7 +64,9 @@ type Group struct {
 	Street         string `json:"street"`
 	Updated        string `json:"updated"`
 	Expand         struct {
-		Sport Sport `json:"sport"`
+		Members []Member `json:"members_via_group"`
+		Seasons []Season `json:"seasons_via_group"`
+		Sport   Sport    `json:"sport"`
 	} `json:"expand,omitempty"`
 }
 
