@@ -36,8 +36,6 @@ func (a App) Run() {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		ctx := app.RootCmd.Context()
 
-		groupHandler := group.NewGroupHandler(app.Dao())
-
 		e.Router.Use(middleware.Logger())
 		e.Router.Use(middleware.CORS())
 		e.Router.Use(middleware.Recover())
@@ -45,6 +43,7 @@ func (a App) Run() {
 
 		e.Router.Static("/static", "static")
 		e.Router.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, base.Index(), nil) })
+		groupHandler := group.NewGroupHandler(app.Dao(), app.Settings().Meta.AppUrl)
 		g := e.Router.Group("/group")
 		g.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 			TokenLookup: "form:csrf,header:csrf",

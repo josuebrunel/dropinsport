@@ -2,6 +2,7 @@ package group
 
 import (
     "fmt"
+    "github.com/josuebrunel/sportdropin/pkg/models"
     "github.com/josuebrunel/sportdropin/pkg/service"
     "github.com/josuebrunel/sportdropin/pkg/view"
     "github.com/josuebrunel/sportdropin/pkg/view/component"
@@ -85,34 +86,34 @@ templ GroupListView(gg view.ViewData[service.RecordSlice]) {
     </div>
 }
 
-templ GroupDetailView(g view.ViewData[service.Record]) {
-    @base.Head(g.V().GetString("name"))
+templ GroupDetailView(g models.Group) {
+    @base.Head(g.Name)
     @base.Body() {
         @base.Main(templ.Attributes{}) {
             <section>
-                <h2>{ g.V().GetString("name") }</h2>
-                <p>{ g.V().GetString("description") }</p>
+                <h2>{ g.Name }</h2>
+                <p>{ g.Description }</p>
             </section>
             <section>
                 <nav>
                     <span role="group">
                         <a href="#stats" class="outline" role="button" 
-                            hx-target="#content" hx-get={ view.Reverse(ctx, "stat.list", g.V().GetId())}>
+                            hx-target="#content" hx-get={ view.Reverse(ctx, "stat.list", g.ID)}>
                             <i class="fa-regular fa-chart-bar"></i> Stats
                         </a>
                                 
                         <a href="#members" class="outline" role="button"
-                            hx-target="#content" hx-get={ view.Reverse(ctx, "member.list", g.V().GetId())}>
+                            hx-target="#content" hx-get={ view.Reverse(ctx, "member.list", g.ID)}>
                             <i class="fa-solid fa-users"></i> Members
                         </a>
                         <a href="#seasons" class="outline" role="button"
-                            hx-target="#content" hx-get={ view.Reverse(ctx, "season.list", g.V().GetId())}>
+                            hx-target="#content" hx-get={ view.Reverse(ctx, "season.list", g.ID)}>
                             <i class="fa-solid fa-calendar-days"></i> Seasons
                         </a>
                     </span>
                 </nav>
             </section>
-            <section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.V().GetId())} hx-target="#content"></section>
+            <section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.ID)} hx-target="#content"></section>
         }
         @base.Footer()
         @base.Scripts()

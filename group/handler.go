@@ -6,10 +6,13 @@ import (
 	"sort"
 
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
+	"github.com/josuebrunel/sportdropin/pkg/models"
+	pb "github.com/josuebrunel/sportdropin/pkg/pbclient"
 	"github.com/josuebrunel/sportdropin/pkg/service"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
 	"github.com/josuebrunel/sportdropin/pkg/xlog"
+	"github.com/josuebrunel/sportdropin/pkg/xsession"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
 )
@@ -36,13 +39,14 @@ type (
 
 type GroupHandler struct {
 	svc service.Service
+	api pb.Client
 }
 
-func NewGroupHandler(db *daos.Dao) *GroupHandler {
+func NewGroupHandler(db *daos.Dao, url string) *GroupHandler {
 	seasonSVC = service.NewService("seasons", "seasonid", db)
 	memberSVC = service.NewService("members", "memberid", db)
 	statSVC = service.NewService("memberstats", "statid", db)
-	return &GroupHandler{svc: service.NewService("groups", "groupid", db)}
+	return &GroupHandler{svc: service.NewService("groups", "groupid", db), api: pb.New(url)}
 }
 
 func (h GroupHandler) GetGroupSportStatSchema(ctx context.Context, groupID string) SportStatSchema {
@@ -114,14 +118,15 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		id := ctx.PathParam(h.svc.GetID())
-		xlog.Debug("get", "group-id", id)
-		resp, err := h.svc.GetByIDWithBackRel(context, id, service.BackRel{"seasons": map[string]any{"group": id}})
+		token := xsession.Get[string](ctx.Request().Context(), xsession.SessionName)
+		xlog.Debug("get", "group-id", id, "token", token)
+		resp, err := h.api.RecordGet("groups", id, pb.QHeaders{"Authorization": token}, pb.QExpand{"sport"})
 		if err != nil {
-			xlog.Error("service", "error", err, "group", id)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		xlog.Debug("get", "group", resp)
-		return view.Render(ctx, http.StatusOK, GroupDetailView(resp), nil)
+		group := pb.ResponseTo[models.Group](resp)
+		xlog.Debug("get group", "group", group)
+		return view.Render(ctx, http.StatusOK, GroupDetailView(group), nil)
 	}
 }
 
