@@ -1,8 +1,12 @@
 package pbclient
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"strings"
+
+	"github.com/josuebrunel/sportdropin/pkg/xlog"
 )
 
 const (
@@ -75,4 +79,12 @@ func QmListString(ss []string) string {
 		}
 	}
 	return qb.String()
+}
+
+func jsonMarshal(d any) io.Reader {
+	b, err := json.Marshal(d)
+	if err != nil {
+		xlog.Error("failed to marshal payload", "payload", d)
+	}
+	return bytes.NewReader(b)
 }

@@ -1,11 +1,8 @@
 package pbclient
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -163,12 +160,4 @@ func ResponseTo[T any](resp *http.Response) T {
 		xlog.Error("failed to unmarshal response", "t", t)
 	}
 	return t
-}
-
-func jsonMarshal(d any) io.Reader {
-	b, err := json.Marshal(d)
-	if err != nil {
-		xlog.Error("failed to marshal payload", "payload", d)
-	}
-	return bytes.NewReader(b)
 }
