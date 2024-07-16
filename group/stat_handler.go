@@ -89,12 +89,7 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		if ctx.Request().Method == http.MethodGet {
-			members, err := memberSVC.ListWithBackRel(
-				context, service.Filters{"group": groupID},
-				service.BackRel{
-					"memberstats": map[string]any{"member": ":id", "group": groupID, "season": curSeason.GetId()},
-				},
-			)
+			members, err := memberSVC.List(context, service.Filters{"group": groupID}, "memberstats_via_member")
 			if err != nil {
 				xlog.Error("error while getting members and stats", "group", groupID, "error", err)
 				return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
@@ -118,12 +113,7 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 			xlog.Error("error while creating stat", "reqs", reqs, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		members, err := memberSVC.ListWithBackRel(
-			context, service.Filters{"group": groupID},
-			service.BackRel{
-				"memberstats": map[string]any{"member": ":id", "group": groupID, "season": curSeason.GetId()},
-			},
-		)
+		members, err := memberSVC.List(context, service.Filters{"group": groupID}, "memberstats_via_member")
 		if err != nil {
 			xlog.Error("error while getting members and stats", "group", groupID, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
