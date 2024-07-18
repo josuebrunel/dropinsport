@@ -2,6 +2,7 @@ package xsession
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
@@ -12,6 +13,12 @@ import (
 )
 
 const SessionName = "xtoken"
+
+type XUser struct {
+	ID    string `json:"id"`
+	Token string `json:"token"`
+	Email string `json:"email"`
+}
 
 type SessionConfig struct {
 	Skipper        middleware.Skipper
@@ -115,8 +122,8 @@ func addHeaderIfMissing(w http.ResponseWriter, key, value string) {
 
 func LoginRequired(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token := SessionManager.GetString(c.Request().Context(), SessionName)
-		if strings.EqualFold(token, "") {
+		sess := GetUser(c.Request().Context())
+		if strings.EqualFold(sess.Token, "") {
 			return c.Redirect(http.StatusFound, "/account/login")
 		}
 		return next(c)
@@ -133,4 +140,20 @@ func Get[T any](c context.Context, name string) T {
 
 func Set(c context.Context, name string, value any) {
 	SessionManager.Put(c, name, value)
+}
+
+func SetUser(c context.Context, u XUser) {
+	b, _ := json.Marshal(u)
+	Set(c, SessionName, b)
+}
+
+func GetUser(c context.Context) XUser {
+	b := Get[[]byte](c, SessionName)
+	var u XUser
+	json.Unmarshal(b, &u)
+	return u
+}
+
+func IsAuthenticated(c context.Context) bool {
+	return !(GetUser(c) == (XUser{}))
 }
