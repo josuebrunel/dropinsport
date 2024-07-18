@@ -1,5 +1,7 @@
 package base
 
+import "github.com/josuebrunel/sportdropin/pkg/xsession"
+
 templ Head(title string) {
 	<head>
 		<meta charset="UTF-8"/>
@@ -15,6 +17,20 @@ templ Styles() {
 	<link rel="stylesheet" href="/static/css/styles.css" type="text/css" media="screen" charset="utf-8"/>
 }
 
+templ AccountMenu() {
+	if xsession.IsAuthenticated(ctx) {
+		<p>Hello { xsession.GetUser(ctx).Email }</p>
+	} else {
+		<details class="dropdown">
+			<summary><i class="fa-solid fa-bars"></i> </summary>
+			<ul>
+				<li><a href="/account/login">Sign in</a></li>
+				<li><a href="/account/register">Sign up</a></li>
+			</ul>
+		</details>
+	}
+}
+
 templ Header() {
 	<header class="container">
 		<nav>
@@ -24,18 +40,11 @@ templ Header() {
 				</li>
 			</ul>
 			<ul>
-				<details class="dropdown">
-					<summary> <i class="fa-solid fa-bars"></i> </summary>
-					<ul>
-						<li><a href="/account/login">Sign in</a></li>
-						<li><a href="/account/register">Sign up</a></li>
-					</ul>
-				</details>
+				@AccountMenu()
 			</ul>
 		</nav>
 		<form role="search" hx-get="/group" hx-trigger="click" hx-target="#container">
 			<input type="search" name="search" id="search" placeholder="Search"/>
-			<input type="submit" value="Search"/>
 		</form>
 		<hr/>
 	</header>
@@ -52,23 +61,23 @@ templ Footer() {
 templ Body() {
 	<body>
 		@Header()
-		{children...}
+		{ children... }
 		@Scripts()
 		@Footer()
 	</body>
 }
 
 templ Main(attr templ.Attributes) {
-	<main class="container" {attr...}>
-		{children...}
+	<main class="container" { attr... }>
+		{ children... }
 	</main>
 }
 
 templ Index() {
 	<html lang="en">
-	@Head("Sportix")
-	@Body() {
-		@Main(templ.Attributes{"id": "container", "hx-trigger": "load", "hx-get": "/group"})
-	}
+		@Head("Sportix")
+		@Body() {
+			@Main(templ.Attributes{"id": "container", "hx-trigger": "load", "hx-get": "/group"})
+		}
 	</html>
 }
