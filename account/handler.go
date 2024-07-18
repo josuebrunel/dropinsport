@@ -13,6 +13,7 @@ import (
 	pb "github.com/josuebrunel/sportdropin/pkg/pbclient"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
+	"github.com/josuebrunel/sportdropin/pkg/xlog"
 	"github.com/josuebrunel/sportdropin/pkg/xsession"
 	"github.com/labstack/echo/v5"
 )
@@ -42,8 +43,8 @@ func NewAccountHandler(baseURL string) AccountHandler {
 	return AccountHandler{Collection: "users", pathParam: "accountid", api: &api}
 }
 
-func (a AccountHandler) GetToken(cx context.Context) string {
-	return xsession.Get[string](cx, xsession.SessionName)
+func (a AccountHandler) GetSession(cx context.Context) xsession.XUser {
+	return xsession.GetUser(cx)
 }
 
 func (a AccountHandler) Login(cx context.Context) echo.HandlerFunc {
@@ -77,16 +78,17 @@ func (a AccountHandler) Login(cx context.Context) echo.HandlerFunc {
 			)
 		}
 		user := pb.ResponseTo[pb.ResponseAuth](resp)
-		xsession.Set(c.Request().Context(), xsession.SessionName, user.Token)
+		xsession.SetUser(c.Request().Context(), xsession.XUser{ID: user.Record.ID, Token: user.Token, Email: user.Record.Email})
 		return c.Redirect(http.StatusFound, view.ReverseX(c, "account.get", user.Record.ID))
 	}
 }
 
 func (a AccountHandler) Get(cx context.Context) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token := a.GetToken(c.Request().Context())
+		sess := a.GetSession(c.Request().Context())
 		id := c.PathParam(a.pathParam)
-		resp, err := a.api.RecordGet("users", id, pb.QHeaders{"Authorization": token})
+		xlog.Debug("user info", "id", id, "session", sess)
+		resp, err := a.api.RecordGet("users", id, pb.QHeaders{"Authorization": sess.Token})
 		if err != nil {
 			return view.Render(c, http.StatusOK, component.Error(err.Error()), nil)
 		}
@@ -135,12 +137,12 @@ func (a AccountHandler) Create(cx context.Context) echo.HandlerFunc {
 func (a AccountHandler) Update(cx context.Context) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var (
-			id    = c.PathParam(a.pathParam)
-			em    = errorsmap.New()
-			token = a.GetToken(c.Request().Context())
-			user  = UserModel{}
+			id   = c.PathParam(a.pathParam)
+			em   = errorsmap.New()
+			sess = a.GetSession(c.Request().Context())
+			user = UserModel{}
 		)
-		resp, err := a.api.RecordGet("users", id, pb.QHeaders{"Authorization": token})
+		resp, err := a.api.RecordGet("users", id, pb.QHeaders{"Authorization": sess.Token})
 		if err != nil {
 			return view.Render(c, http.StatusOK, component.Error(err.Error()), nil)
 		}
@@ -159,7 +161,7 @@ func (a AccountHandler) Update(cx context.Context) echo.HandlerFunc {
 				nil,
 			)
 		}
-		_, err = a.api.RecordUpdate("users", id, pb.NewQData(req), pb.QHeaders{"Authorization": token})
+		_, err = a.api.RecordUpdate("users", id, pb.NewQData(req), pb.QHeaders{"Authorization": sess.Token})
 		if err != nil {
 			em["error"] = err
 			return view.Render(c, http.StatusOK, EditFormView(user, em,
@@ -167,7 +169,7 @@ func (a AccountHandler) Update(cx context.Context) echo.HandlerFunc {
 				nil,
 			)
 		}
-		resp, err = a.api.RecordGet("users", id, pb.QHeaders{"Authorization": token})
+		resp, err = a.api.RecordGet("users", id, pb.QHeaders{"Authorization": sess.Token})
 		if err != nil {
 			return view.Render(c, http.StatusOK, component.Error(err.Error()), nil)
 		}
@@ -179,10 +181,10 @@ func (a AccountHandler) Update(cx context.Context) echo.HandlerFunc {
 func (a AccountHandler) Groups(cx context.Context) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var (
-			id    = c.PathParam(a.pathParam)
-			token = a.GetToken(c.Request().Context())
+			id   = c.PathParam(a.pathParam)
+			sess = a.GetSession(c.Request().Context())
 		)
-		resp, err := a.api.RecordGet("users", id, pb.QHeaders{"Authorization": token}, pb.QExpand{"groups_via_user.sport"})
+		resp, err := a.api.RecordGet("users", id, pb.QHeaders{"Authorization": sess.Token}, pb.QExpand{"groups_via_user.sport"})
 		if err != nil {
 			return view.Render(c, http.StatusOK, component.Error(err.Error()), nil)
 		}
