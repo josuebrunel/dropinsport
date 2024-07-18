@@ -49,6 +49,14 @@ func NewGroupHandler(db *daos.Dao, url string) *GroupHandler {
 	return &GroupHandler{svc: service.NewService("groups", "groupid", db), api: pb.New(url)}
 }
 
+func (h GroupHandler) GetGroup(id string) (service.Record, error) {
+	v, err := h.svc.GetByID(context.Background(), id, "sport")
+	if err != nil {
+		xlog.Error("error while getting group", "group", id, "error", err)
+	}
+	return v.V(), err
+}
+
 func (h GroupHandler) GetGroupSportStatSchema(ctx context.Context, groupID string) SportStatSchema {
 	group, err := h.svc.GetByID(ctx, groupID, "sport")
 	if err != nil {

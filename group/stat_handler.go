@@ -89,7 +89,12 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		if ctx.Request().Method == http.MethodGet {
-			members, err := memberSVC.List(context, service.Filters{"group": groupID}, "memberstats_via_member")
+			members, err := memberSVC.ListWithBackRel(
+				context, service.Filters{"group": groupID},
+				service.BackRel{
+					"memberstats": map[string]any{"member": ":id", "group": groupID, "season": curSeason.GetId()},
+				},
+			)
 			if err != nil {
 				xlog.Error("error while getting members and stats", "group", groupID, "error", err)
 				return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
@@ -106,6 +111,8 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 		if err := ctx.Bind(&req); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
+
+		group, _ := h.GetGroup(groupID)
 		reqs := formDataToRequests(groupID, curSeason.GetId(), req, schema)
 		xlog.Debug("request data", "requests", reqs)
 		_, err = statSVC.BulkUpsert(context, reqs)
@@ -113,20 +120,26 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 			xlog.Error("error while creating stat", "reqs", reqs, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		members, err := memberSVC.List(context, service.Filters{"group": groupID}, "memberstats_via_member")
+		members, err := memberSVC.ListWithBackRel(
+			context, service.Filters{"group": groupID},
+			service.BackRel{
+				"memberstats": map[string]any{"member": ":id", "group": groupID, "season": curSeason.GetId()},
+			},
+		)
 		if err != nil {
 			xlog.Error("error while getting members and stats", "group", groupID, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		data := memberStatsToData(schema, members.V())
 		xlog.Debug("members stats", "stats", data)
-		return view.Render(ctx, http.StatusOK, GroupStatList(groupID, data, schema), nil)
+		return view.Render(ctx, http.StatusOK, GroupStatList(group, data, schema), nil)
 	}
 }
 
 func (h GroupHandler) StatList(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		groupID := ctx.PathParam(h.svc.GetID())
+		group, _ := h.GetGroup(groupID)
 		curSeason, err := h.GetGroupCurrentSeason(context, groupID)
 		if err != nil {
 			xlog.Error("error while getting current season", "group", groupID, "error", err)
@@ -143,9 +156,9 @@ func (h GroupHandler) StatList(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		schema := h.GetGroupSportStatSchema(context, groupID)
-		xlog.Debug("members and stats", "members", members, "schema", schema)
+		xlog.Debug("members and stats", "members", members, "schema", schema, "group")
 		data := memberStatsToData(schema, members.V())
 		xlog.Debug("stats", "stats", data)
-		return view.Render(ctx, http.StatusOK, GroupStatList(groupID, data, schema), nil)
+		return view.Render(ctx, http.StatusOK, GroupStatList(group, data, schema), nil)
 	}
 }

@@ -1,122 +1,146 @@
 package group
 
 import (
-    "fmt"
-    "github.com/josuebrunel/sportdropin/pkg/models"
-    "github.com/josuebrunel/sportdropin/pkg/service"
-    "github.com/josuebrunel/sportdropin/pkg/view"
-    "github.com/josuebrunel/sportdropin/pkg/view/component"
-    "github.com/josuebrunel/sportdropin/pkg/view/base"
+	"fmt"
+	"github.com/josuebrunel/sportdropin/pkg/models"
+	"github.com/josuebrunel/sportdropin/pkg/service"
+	"github.com/josuebrunel/sportdropin/pkg/view"
+	"github.com/josuebrunel/sportdropin/pkg/view/base"
+	"github.com/josuebrunel/sportdropin/pkg/view/component"
+	"github.com/josuebrunel/sportdropin/pkg/xsession"
+	"strings"
 )
 
 templ GroupFormView(r view.ViewData[service.Record], attr templ.Attributes) {
-    <article>
-        <header>
-            <a href="#close" aria-label="Close" class="close" data-target="group-modal" hx-get="#"
-                hx-target="#group-modal" hx-swap="delete"></a>
-        </header>
-        <form hx-target="#container" {attr...} >
-            @component.InputCSRF(view.Get[string](ctx, "csrf"))
-            <div>
-                @component.InputWithLabel("sport",templ.Attributes{"type": "text", "name": "sport", "value": r.V().GetString("sport"), "required": true})
-                if !r.ErrNil("sport") { 
-                    @component.Error(r.ErrGet("sport")) 
-                }
-            </div>
-            <div>
-                @component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true})
-                if !r.ErrNil("name") { 
-                    @component.Error(r.ErrGet("name")) 
-                }
-            </div>
-            <div>
-                @component.TextAreaWithLabel(
-                    "description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.V().GetString("Description"))
-            </div>
-            <div>
-                @component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.V().GetString("street"), "required": true})
-                if !r.ErrNil("street") { 
-                    @component.Error(r.ErrGet("street")) 
-                }
-            </div>
-            <div class="grid">
-                @component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.V().GetString("city"), "required": true})
-                if !r.ErrNil("city") { 
-                    @component.Error(r.ErrGet("city")) 
-                }
-                @component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.V().GetString("country"), "required": true})
-                if !r.ErrNil("country") { 
-                    @component.Error(r.ErrGet("country")) 
-                }
-            </div>
-            @component.ButtonSubmit("Save", templ.Attributes{
-                "value": "save", 
-                "class": "primary",
-            })
-            @component.ButtonSubmit("Delete", templ.Attributes{
-                "value": "delete",
-                "class": "secondary",
-                "hx-delete": view.Reverse(ctx, "group.delete", r.V().GetId()),
-                "hx-confirm": "Do you really want to delete this group?",
-                "hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
-            })
-        </form>
-    </article>
+	<article>
+		<header>
+			<a
+				href="#close"
+				aria-label="Close"
+				class="close"
+				data-target="group-modal"
+				hx-get="#"
+				hx-target="#group-modal"
+				hx-swap="delete"
+			></a>
+		</header>
+		<form hx-target="#container" { attr... }>
+			@component.InputCSRF(view.Get[string](ctx, "csrf"))
+			<div>
+				@component.InputWithLabel("sport", templ.Attributes{"type": "text", "name": "sport", "value": r.V().GetString("sport"), "required": true})
+				if !r.ErrNil("sport") {
+					@component.Error(r.ErrGet("sport"))
+				}
+			</div>
+			<div>
+				@component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true})
+				if !r.ErrNil("name") {
+					@component.Error(r.ErrGet("name"))
+				}
+			</div>
+			<div>
+				@component.TextAreaWithLabel(
+					"description", templ.Attributes{"name": "description", "id": "description", "cols": "30", "rows": "10"}, r.V().GetString("Description"))
+			</div>
+			<div>
+				@component.InputWithLabel("street", templ.Attributes{"type": "text", "name": "street", "value": r.V().GetString("street"), "required": true})
+				if !r.ErrNil("street") {
+					@component.Error(r.ErrGet("street"))
+				}
+			</div>
+			<div class="grid">
+				@component.InputWithLabel("city", templ.Attributes{"type": "text", "name": "city", "value": r.V().GetString("city"), "required": true})
+				if !r.ErrNil("city") {
+					@component.Error(r.ErrGet("city"))
+				}
+				@component.InputWithLabel("country", templ.Attributes{"type": "text", "name": "country", "value": r.V().GetString("country"), "required": true})
+				if !r.ErrNil("country") {
+					@component.Error(r.ErrGet("country"))
+				}
+			</div>
+			@component.ButtonSubmit("Save", templ.Attributes{
+				"value": "save",
+				"class": "primary",
+			})
+			@component.ButtonSubmit("Delete", templ.Attributes{
+				"value":      "delete",
+				"class":      "secondary",
+				"hx-delete":  view.Reverse(ctx, "group.delete", r.V().GetId()),
+				"hx-confirm": "Do you really want to delete this group?",
+				"hx-headers": fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")),
+			})
+		</form>
+	</article>
 }
 
 templ GroupListView(gg view.ViewData[service.RecordSlice]) {
-    <div id="groups" hx-get={ view.Reverse(ctx, "group.list")} hx-trigger="groupChange from:body" hx-target="this">
-        if len(gg.V()) == 0 {
-            <p>No group found</p>
-        }
-        for _, g := range gg.V() {
-            <article>
-                <h3>
-                    @component.Link(g.GetString("name"), view.Reverse(ctx, "group.get", g.GetId()), templ.Attributes{})
-                </h3>
-                <p><i>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</i></p>
-                <p>{ g.GetString("description") }</p>
-            </article>
-        }
-        @component.Link("Add a group", "", templ.Attributes{
-            "hx-get":  view.Reverse(ctx, "group.create"),
-            "hx-target": "#container",
-            "role": "button",
-        })
-    </div>
+	<div id="groups" hx-get={ view.Reverse(ctx, "group.list") } hx-trigger="groupChange from:body" hx-target="this">
+		if len(gg.V()) == 0 {
+			<p>No group found</p>
+		}
+		for _, g := range gg.V() {
+			<article>
+				<h3>
+					@component.Link(g.GetString("name"), view.Reverse(ctx, "group.get", g.GetId()), templ.Attributes{})
+				</h3>
+				<p><i>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</i></p>
+				<p>{ g.GetString("description") }</p>
+			</article>
+		}
+		@component.Link("Add a group", "", templ.Attributes{
+			"hx-get":    view.Reverse(ctx, "group.create"),
+			"hx-target": "#container",
+			"role":      "button",
+		})
+	</div>
 }
 
 templ GroupDetailView(g models.Group) {
-    @base.Head(g.Name)
-    @base.Body() {
-        @base.Main(templ.Attributes{}) {
-            <section>
-                <h2>{ g.Name }</h2>
-                <p>{ g.Description }</p>
-            </section>
-            <section>
-                <nav>
-                    <span role="group">
-                        <a href="#stats" class="outline" role="button" 
-                            hx-target="#content" hx-get={ view.Reverse(ctx, "stat.list", g.ID)}>
-                            <i class="fa-regular fa-chart-bar"></i> Stats
-                        </a>
-                                
-                        <a href="#members" class="outline" role="button"
-                            hx-target="#content" hx-get={ view.Reverse(ctx, "member.list", g.ID)}>
-                            <i class="fa-solid fa-users"></i> Members
-                        </a>
-                        <a href="#seasons" class="outline" role="button"
-                            hx-target="#content" hx-get={ view.Reverse(ctx, "season.list", g.ID)}>
-                            <i class="fa-solid fa-calendar-days"></i> Seasons
-                        </a>
-                    </span>
-                </nav>
-            </section>
-            <section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.ID)} hx-target="#content"></section>
-        }
-        @base.Footer()
-        @base.Scripts()
-    }
+	@base.Head(g.Name)
+	@base.Body() {
+		@base.Main(templ.Attributes{}) {
+			<section>
+				<h2>{ g.Name }</h2>
+				<p>{ g.Description }</p>
+			</section>
+			<section>
+				<nav>
+					<span role="group">
+						<a
+							href="#stats"
+							class="outline"
+							role="button"
+							hx-target="#content"
+							hx-get={ view.Reverse(ctx, "stat.list", g.ID) }
+						>
+							<i class="fa-regular fa-chart-bar"></i> Stats
+						</a>
+						if strings.EqualFold(xsession.GetUser(ctx).ID,g.User) {
+							<a
+								href="#members"
+								class="outline"
+								role="button"
+								hx-target="#content"
+								hx-get={ view.Reverse(ctx, "member.list", g.ID) }
+							>
+								<i class="fa-solid fa-users"></i> Members
+							</a>
+							<a
+								href="#seasons"
+								class="outline"
+								role="button"
+								hx-target="#content"
+								hx-get={ view.Reverse(ctx, "season.list", g.ID) }
+							>
+								<i class="fa-solid fa-calendar-days"></i> Seasons
+							</a>
+						}
+					</span>
+				</nav>
+			</section>
+			<section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.ID) } hx-target="#content"></section>
+		}
+		@base.Footer()
+		@base.Scripts()
+	}
 }
-
