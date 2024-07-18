@@ -34,7 +34,7 @@ func Render(ctx echo.Context, status int, tpl templ.Component, data any) error {
 	if v := ctx.Get("csrf"); v != nil {
 		csrf = v.(string)
 	}
-	cx := context.Background()
+	cx := ctx.Request().Context()
 	cx = context.WithValue(cx, xc, map[string]any{
 		"request": ctx.Request(),
 		"url":     ctx.Request().URL.String(),
