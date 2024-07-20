@@ -58,7 +58,7 @@ func (a App) Run() {
 		g.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:groupid", Handler: groupHandler.Delete(ctx), Name: "group.delete"})
 		// SEASONS
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/season/create", Handler: groupHandler.SeasonCreate(ctx), Name: "season.create"})
-		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/:groupid/season/create", Handler: groupHandler.SeasonCreate(ctx), Name: "season.created"})
+		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/:groupid/season/create", Handler: groupHandler.SeasonCreate(ctx), Name: "season.create"})
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/seasons", Handler: groupHandler.SeasonList(ctx), Name: "season.list"})
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/season/:seasonid/edit", Handler: groupHandler.SeasonEdit(ctx), Name: "season.edit"})
 		g.AddRoute(echo.Route{Method: http.MethodPatch, Path: "/:groupid/season/:seasonid/edit", Handler: groupHandler.SeasonEdit(ctx), Name: "season.edit"})
@@ -77,6 +77,9 @@ func (a App) Run() {
 		// ACCOUNTS
 		accountHandler := account.NewAccountHandler(app.App.Settings().Meta.AppUrl)
 		a := e.Router.Group("/account")
+		a.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+			TokenLookup: "form:csrf,header:csrf",
+		}))
 		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/login", Handler: accountHandler.Login(ctx), Name: "account.login"})
 		a.AddRoute(echo.Route{Method: http.MethodPost, Path: "/login", Handler: accountHandler.Login(ctx), Name: "account.login"})
 		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:accountid", Handler: accountHandler.Get(ctx), Name: "account.get",

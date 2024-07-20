@@ -1,169 +1,184 @@
 package account
 
 import (
-    "fmt"
-   "github.com/josuebrunel/sportdropin/pkg/models"
-   "github.com/josuebrunel/sportdropin/pkg/view"
-   "github.com/josuebrunel/sportdropin/pkg/view/component"
-   "github.com/josuebrunel/sportdropin/pkg/view/base"
-   "github.com/josuebrunel/sportdropin/pkg/errorsmap"
+	"fmt"
+	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
+	"github.com/josuebrunel/sportdropin/pkg/models"
+	"github.com/josuebrunel/sportdropin/pkg/view"
+	"github.com/josuebrunel/sportdropin/pkg/view/base"
+	"github.com/josuebrunel/sportdropin/pkg/view/component"
 )
 
 templ FormView(err errorsmap.EMap, attr templ.Attributes) {
-    <form {attr...}>
-        @component.InputCSRF(view.Get[string](ctx, "csrf"))
-        {children...}
-    </form>
+	<form { attr... }>
+		@component.InputCSRF(view.Get[string](ctx, "csrf"))
+		{ children... }
+	</form>
 }
 
 templ LoginFormView(r errorsmap.EMap, attr templ.Attributes) {
-    @base.Head("Login")
-    @base.Body(){
-        @base.Main(templ.Attributes{}) {
-            if !r.IfNil("error") {
-                @component.Error(r.Get("error"))
-            }
-            @FormView(r, attr) {
-                <div>
-                    @component.InputWithLabel("username",templ.Attributes{"type": "text", "name": "username", "required": true})
-                    if !r.IfNil("username") {
-                        @component.Error(r.Get("username"))
-                    }
-                </div>
-                <div>
-                    @component.InputWithLabel("password", templ.Attributes{"type": "password", "name": "password", "required": true})
-                    if !r.IfNil("password") {
-                        @component.Error(r.Get("password"))
-                    }
-                </div>
-                @component.ButtonSubmit("Login", templ.Attributes{
-                    "value": "login",
-                    "class": "primary",
-                })
-            }
-        }
-    }
-    @base.Footer()
-    @base.Scripts()
+	@base.Head("Login")
+	@base.Body() {
+		@base.Main(templ.Attributes{}) {
+			if !r.IfNil("error") {
+				@component.Error(r.Get("error"))
+			}
+			@FormView(r, attr) {
+				<div>
+					@component.InputWithLabel("username", templ.Attributes{"type": "text", "name": "username", "required": true})
+					if !r.IfNil("username") {
+						@component.Error(r.Get("username"))
+					}
+				</div>
+				<div>
+					@component.InputWithLabel("password", templ.Attributes{"type": "password", "name": "password", "required": true})
+					if !r.IfNil("password") {
+						@component.Error(r.Get("password"))
+					}
+				</div>
+				@component.ButtonSubmit("Login", templ.Attributes{
+					"value": "login",
+					"class": "primary",
+				})
+			}
+		}
+	}
+	@base.Footer()
+	@base.Scripts()
 }
 
 templ EditFormView(user UserModel, r errorsmap.EMap, attr templ.Attributes) {
-    @FormView(r, attr) {
-        <div>
-            @component.InputWithLabel("username",templ.Attributes{"type": "text", "name": "username", "value": user.Username, "required": true})
-            if !r.IfNil("username") {
-                @component.Error(r.Get("username"))
-            }
-        </div>
-        <div>
-            @component.InputWithLabel("email",templ.Attributes{"type": "text", "name": "email", "value": user.Email, "required": true})
-            if !r.IfNil("email") {
-                @component.Error(r.Get("email"))
-            }
-        </div>
-        <div>
-            @component.InputWithLabel("password", templ.Attributes{"type": "password", "name": "password"})
-            if !r.IfNil("password") {
-                @component.Error(r.Get("password"))
-            }
-        </div>
-        <div>
-            @component.InputWithLabel("password confirmation", templ.Attributes{"type": "password", "name": "passwordConfirm"})
-            if !r.IfNil("passwordConfirm") {
-                @component.Error(r.Get("passwordConfirm"))
-            }
-        </div>
-        @component.ButtonSubmit("Save", templ.Attributes{
-            "value": "save",
-            "class": "primary",
-        })
-    }
+	@FormView(r, attr) {
+		<div>
+			@component.InputWithLabel("username", templ.Attributes{"type": "text", "name": "username", "value": user.Username, "required": true})
+			if !r.IfNil("username") {
+				@component.Error(r.Get("username"))
+			}
+		</div>
+		<div>
+			@component.InputWithLabel("email", templ.Attributes{"type": "text", "name": "email", "value": user.Email, "required": true})
+			if !r.IfNil("email") {
+				@component.Error(r.Get("email"))
+			}
+		</div>
+		<div>
+			@component.InputWithLabel("password", templ.Attributes{"type": "password", "name": "password"})
+			if !r.IfNil("password") {
+				@component.Error(r.Get("password"))
+			}
+		</div>
+		<div>
+			@component.InputWithLabel("password confirmation", templ.Attributes{"type": "password", "name": "passwordConfirm"})
+			if !r.IfNil("passwordConfirm") {
+				@component.Error(r.Get("passwordConfirm"))
+			}
+		</div>
+		@component.ButtonSubmit("Save", templ.Attributes{
+			"value": "save",
+			"class": "primary",
+		})
+	}
 }
 
 templ RegisterFormView(r errorsmap.EMap, attr templ.Attributes) {
-    @base.Head("Registration")
-    @base.Body(){
-        @base.Main(templ.Attributes{}) {
-            @EditFormView(UserModel{}, r, attr)
-        }
-    }
-    @base.Footer()
-    @base.Scripts()
+	@base.Head("Registration")
+	@base.Body() {
+		@base.Main(templ.Attributes{}) {
+			@EditFormView(UserModel{}, r, attr)
+		}
+	}
+	@base.Footer()
 }
 
 templ ProfileView(user UserModel) {
-    @base.Head(user.Username)
-    @base.Body() {
-        @base.Main(templ.Attributes{}) {
-            <section>
-                <h2>{ user.Email }</h2>
-            </section>
-            <section>
-                <nav>
-                    <span role="group">
-                        <a href="#profile" class="outline" role="button"
-                            hx-target="#content" hx-get={ view.Reverse(ctx, "account.update", user.ID)}>
-                            <i class="fa-solid fa-user-pen"></i> Edit profile
-                        </a>
-                        <a href="#groups" class="outline" role="button"
-                            hx-target="#content" hx-get={ view.WithQS(view.Reverse(ctx, "account.groups", user.ID), map[string]string{"owner": user.ID})}>
-                            <i class="fa-solid fa-users-between-lines"></i> Manage groups
-                        </a>
-                    </span>
-                </nav>
-            </section>
-            <section id="content" hx-trigger="load" hx-target="#content"
-                hx-get={ view.WithQS(view.Reverse(ctx, "account.groups", user.ID), map[string]string{"user": user.ID})}>
-            </section>
-        }
-        @base.Footer()
-        @base.Scripts()
-    }
+	@base.Head(user.Username)
+	@base.Body() {
+		@base.Main(templ.Attributes{}) {
+			<section>
+				<h2>{ user.Email }</h2>
+			</section>
+			<section>
+				<nav>
+					<span role="group">
+						<a
+							href="#profile"
+							class="outline"
+							role="button"
+							hx-target="#content"
+							hx-get={ view.Reverse(ctx, "account.update", user.ID) }
+						>
+							<i class="fa-solid fa-user-pen"></i> Edit profile
+						</a>
+						<a
+							href="#groups"
+							class="outline"
+							role="button"
+							hx-target="#content"
+							hx-get={ view.WithQS(view.Reverse(ctx, "account.groups", user.ID), map[string]string{"owner": user.ID}) }
+						>
+							<i class="fa-solid fa-users-between-lines"></i> Manage groups
+						</a>
+					</span>
+				</nav>
+			</section>
+			<section
+				id="content"
+				hx-trigger="load"
+				hx-target="#content"
+				hx-get={ view.WithQS(view.Reverse(ctx, "account.groups", user.ID), map[string]string{"user": user.ID}) }
+			></section>
+		}
+		@base.Footer()
+		@base.Scripts()
+	}
 }
 
 templ GroupListView(gg []models.Group, attr templ.Attributes) {
-    <h3>
-        Groups 
-        <i class="fa-solid fa-user-plus button" hx-get={view.Reverse(ctx, "group.create")} hx-target="#content" role="button"></i>
-    </h3>
-    @component.Table() {
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Street</th>
-                <th>City</th>
-                <th>Country</th>
-                <th>Sport</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            for _, g := range gg {
-            <tr>
-                <td><strong>@component.Link(g.Name, view.Reverse(ctx, "group.get", g.ID), templ.Attributes{})</strong></td>
-                <td>{ g.Street }</td>
-                <td>{ g.City }</td>
-                <td>{ g.Country }</td>
-                <td>{ g.Expand.Sport.Name }</td>
-                <td>
-                    <span class="actions">
-                        <i class="fas fa-edit button outline" 
-                            role="button"
-                            hx-get={ view.Reverse(ctx, "group.update", g.ID) } 
-                            hx-target="#content">
-                        </i>
-                        <i class="fas fa-trash-alt button outline"
-                            role="button"
-                            style="color:red;"
-                            hx-target="#content"
-                            hx-delete={ view.Reverse(ctx, "group.delete", g.ID) } 
-                            hx-confirm="Do you really want to delete this member?"
-                            hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }>
-                        </i>
-                    </span>
-                </td>
-            </tr>
-            }
-        </tbody>
-    }
+	<h3>
+		Groups 
+		<i class="fa-solid fa-user-plus button" hx-get={ view.Reverse(ctx, "group.create") } hx-target="#content" role="button"></i>
+	</h3>
+	@component.Table() {
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Street</th>
+				<th>City</th>
+				<th>Country</th>
+				<th>Sport</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, g := range gg {
+				<tr>
+					<td><strong>@component.Link(g.Name, view.Reverse(ctx, "group.get", g.ID), templ.Attributes{})
+</strong></td>
+					<td>{ g.Street }</td>
+					<td>{ g.City }</td>
+					<td>{ g.Country }</td>
+					<td>{ g.Expand.Sport.Name }</td>
+					<td>
+						<span class="actions">
+							<i
+								class="fas fa-edit button outline"
+								role="button"
+								hx-get={ view.Reverse(ctx, "group.update", g.ID) }
+								hx-target="#content"
+							></i>
+							<i
+								class="fas fa-trash-alt button outline"
+								role="button"
+								style="color:red;"
+								hx-target="#content"
+								hx-delete={ view.Reverse(ctx, "group.delete", g.ID) }
+								hx-confirm="Do you really want to delete this member?"
+								hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }
+							></i>
+						</span>
+					</td>
+				</tr>
+			}
+		</tbody>
+	}
 }
