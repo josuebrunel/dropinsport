@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/a-h/templ"
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
 	"github.com/josuebrunel/sportdropin/pkg/models"
 	pb "github.com/josuebrunel/sportdropin/pkg/pbclient"
@@ -102,7 +103,7 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 		if ctx.Request().Method == http.MethodGet {
 			return view.Render(ctx, http.StatusOK, GroupFormView(
 				view.NewViewData(h.svc.GetNewRecord(), errorsmap.New()),
-				map[string]any{"hx-post": reverse(ctx, "group.create")}), nil)
+				templ.Attributes{"target": "#content", "hx-post": reverse(ctx, "group.create")}), nil)
 		}
 		if err = ctx.Bind(&req); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
@@ -118,7 +119,6 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		return view.Render(ctx, http.StatusOK, GroupListView(resp), nil)
-
 	}
 
 }
@@ -141,10 +141,11 @@ func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		id := ctx.PathParam(h.svc.GetID())
+		group, _ := h.GetGroup(id)
 		if ctx.Request().Method == http.MethodGet {
 			return view.Render(ctx, http.StatusOK, GroupFormView(
-				view.NewViewData(h.svc.GetNewRecord(), errorsmap.New()),
-				map[string]any{"hx-patch": reverse(ctx, "group.update", id)}), nil)
+				view.NewViewData(group, errorsmap.New()),
+				templ.Attributes{"target": "#content", "hx-patch": reverse(ctx, "group.update", id)}), nil)
 		}
 		req := service.Request{"id": id}
 		if err := ctx.Bind(&req); err != nil {
