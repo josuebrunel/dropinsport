@@ -136,7 +136,7 @@ func SearchBar() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form role=\"search\" hx-get=\"/group\" hx-trigger=\"click\" hx-target=\"#container\"><input type=\"search\" name=\"search\" id=\"search\" placeholder=\"Search\"></form>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form role=\"search\" hx-get=\"/group\" hx-trigger=\"click\" hx-target=\"#container\"><input class=\"search-bar\" type=\"search\" name=\"search\" id=\"search\" placeholder=\"Search\"></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -210,7 +210,7 @@ func Layout(title string) templ.Component {
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = component.LinkStyle("https://cdn.jsdelivr.net/npm/@picocss/pico@next/css/pico.min.css", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = component.LinkStyle("https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.blue.min.css", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -226,7 +226,7 @@ func Layout(title string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = component.LinkStyle("/static/css/styles.css", templ.Attributes{"type": "text/css", "media": "screen", "charset": "utf-8"}).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = component.LinkStyle("/static/css/style.css", templ.Attributes{"type": "text/css", "media": "screen", "charset": "utf-8"}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

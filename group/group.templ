@@ -9,6 +9,7 @@ import (
 	"github.com/josuebrunel/sportdropin/pkg/view/base"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
 	"github.com/josuebrunel/sportdropin/pkg/xsession"
+	"html/template"
 	"strings"
 )
 
@@ -71,15 +72,18 @@ templ GroupListView(gg view.ViewData[service.RecordSlice]) {
 			<p>No group found</p>
 		}
 		for _, g := range gg.V() {
-			<article>
+			<hgroup class="group-card">
 				<h3>
 					@component.Link(g.GetString("name"), view.Reverse(ctx, "group.get", g.GetId()), templ.Attributes{})
 				</h3>
 				<p><i>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</i></p>
-				<p><pre style="background-color:white;">{ g.GetString("description") }</pre></p>
-			</article>
+				<p>
+					@templ.Raw(strings.Replace(template.HTMLEscapeString(g.GetString("description")), "\n", "<br/>", -1))
+				</p>
+			</hgroup>
 		}
 		@component.Link("Add a group", "", templ.Attributes{
+			"class":     "add-group-button",
 			"hx-get":    view.Reverse(ctx, "group.create"),
 			"hx-target": "#content",
 			"role":      "button",
@@ -93,7 +97,9 @@ templ GroupDetailView(g models.Group) {
 		@base.Main(templ.Attributes{}) {
 			<section>
 				<h2>{ g.Name }</h2>
-				<p><pre style="background-color:white;">{ g.Description }</pre></p>
+				<p>
+					@templ.Raw(strings.Replace(template.HTMLEscapeString(g.Description), "\n", "<br/>", -1))
+				</p>
 			</section>
 			<section class="selection">
 				<span role="group">

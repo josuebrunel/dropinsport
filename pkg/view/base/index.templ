@@ -31,7 +31,7 @@ templ Main(attr templ.Attributes) {
 
 templ SearchBar() {
 	<form role="search" hx-get="/group" hx-trigger="click" hx-target="#container">
-		<input type="search" name="search" id="search" placeholder="Search"/>
+		<input class="search-bar" type="search" name="search" id="search" placeholder="Search"/>
 	</form>
 }
 
@@ -42,9 +42,9 @@ templ Layout(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			@component.Title(title)
 			@component.Styles() {
-				@component.LinkStyle("https://cdn.jsdelivr.net/npm/@picocss/pico@next/css/pico.min.css", templ.Attributes{})
+				@component.LinkStyle("https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.blue.min.css", templ.Attributes{})
 				@component.LinkStyle("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css", templ.Attributes{})
-				@component.LinkStyle("/static/css/styles.css", templ.Attributes{"type": "text/css", "media": "screen", "charset": "utf-8"})
+				@component.LinkStyle("/static/css/style.css", templ.Attributes{"type": "text/css", "media": "screen", "charset": "utf-8"})
 			}
 		}
 		@component.Body(templ.Attributes{}) {
