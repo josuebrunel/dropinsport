@@ -25,3 +25,12 @@ func ZipApply[X any, Y any, R any](xx []X, yy []Y, fn func(X, Y) R) []R {
 	}
 	return result
 }
+
+func ToMap[T any, K comparable, V any](list []T, fn func(T) (K, V)) map[K]V {
+	result := make(map[K]V)
+	for _, i := range list {
+		k, v := fn(i)
+		result[k] = v
+	}
+	return result
+}

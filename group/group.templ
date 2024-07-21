@@ -2,6 +2,7 @@ package group
 
 import (
 	"fmt"
+	"github.com/josuebrunel/sportdropin/pkg/collection"
 	"github.com/josuebrunel/sportdropin/pkg/models"
 	"github.com/josuebrunel/sportdropin/pkg/service"
 	"github.com/josuebrunel/sportdropin/pkg/view"
@@ -11,7 +12,7 @@ import (
 	"strings"
 )
 
-templ GroupFormView(r view.ViewData[service.Record], attr templ.Attributes) {
+templ GroupFormView(r view.ViewData[service.Record], sports view.ViewData[service.RecordSlice], attr templ.Attributes) {
 	<form { attr... }>
 		if strings.EqualFold(r.V().GetId(),"") {
 			<h5>Add group </h5>
@@ -21,10 +22,11 @@ templ GroupFormView(r view.ViewData[service.Record], attr templ.Attributes) {
 		@component.InputCSRF(view.Get[string](ctx, "csrf"))
 		@component.InputHidden("user", xsession.GetUser(ctx).ID)
 		<div>
-			@component.InputWithLabel("sport", templ.Attributes{"type": "text", "name": "sport", "value": r.V().GetString("sport"), "required": true})
-			if !r.ErrNil("sport") {
-				@component.Error(r.ErrGet("sport"))
-			}
+			// @component.InputWithLabel("sport", templ.Attributes{"type": "text", "name": "sport", "value": r.V().GetString("sport"), "required": true})
+			// if !r.ErrNil("sport") {
+			// 	@component.Error(r.ErrGet("sport"))
+			// }
+			@SportListView(sports, r.V().GetString("sport"))
 		</div>
 		<div>
 			@component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true})
@@ -137,4 +139,14 @@ templ GroupDetailView(g models.Group) {
 		@base.Footer()
 		@base.Scripts()
 	}
+}
+
+templ SportListView(ss view.ViewData[service.RecordSlice], selected string) {
+	@component.SelectWithLabel("sports", component.Select(
+		templ.Attributes{"name": "sport"},
+		collection.ToMap(ss.V(), func(r service.Record) (string, string) {
+			return r.GetString("name"), r.GetId()
+		}),
+		selected,
+	))
 }

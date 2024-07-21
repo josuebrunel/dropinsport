@@ -28,6 +28,7 @@ var (
 	seasonSVC service.Service
 	memberSVC service.Service
 	statSVC   service.Service
+	sportSVC  service.Service
 )
 
 type (
@@ -47,6 +48,7 @@ func NewGroupHandler(db *daos.Dao, url string) *GroupHandler {
 	seasonSVC = service.NewService("seasons", "seasonid", db)
 	memberSVC = service.NewService("members", "memberid", db)
 	statSVC = service.NewService("memberstats", "statid", db)
+	sportSVC = service.NewService("sports", "sportid", db)
 	return &GroupHandler{svc: service.NewService("groups", "groupid", db), api: pb.New(url)}
 }
 
@@ -94,6 +96,16 @@ func (h GroupHandler) GetGroupCurrentSeason(ctx context.Context, groupID string)
 	return currentSeason, nil
 }
 
+func (h GroupHandler) GetSports(ctx context.Context) (view.ViewData[service.RecordSlice], error) {
+	sports, err := sportSVC.List(ctx, service.Filters{})
+	if err != nil {
+		xlog.Error("failed to get sport list", "error", err)
+		return view.ViewData[service.RecordSlice]{}, err
+	}
+	return sports, nil
+
+}
+
 func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var (
@@ -101,8 +113,12 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 			req = service.Request{}
 		)
 		if ctx.Request().Method == http.MethodGet {
+			sports, err := h.GetSports(context)
+			if err != nil {
+				xlog.Error("error while getting sports", "error", err)
+			}
 			return view.Render(ctx, http.StatusOK, GroupFormView(
-				view.NewViewData(h.svc.GetNewRecord(), errorsmap.New()),
+				view.NewViewData(h.svc.GetNewRecord(), errorsmap.New()), sports,
 				templ.Attributes{"target": "#content", "hx-post": reverse(ctx, "group.create")}), nil)
 		}
 		if err = ctx.Bind(&req); err != nil {
@@ -143,8 +159,12 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 		id := ctx.PathParam(h.svc.GetID())
 		group, _ := h.GetGroup(id)
 		if ctx.Request().Method == http.MethodGet {
+			sports, err := h.GetSports(context)
+			if err != nil {
+				xlog.Error("error while getting sports", "error", err)
+			}
 			return view.Render(ctx, http.StatusOK, GroupFormView(
-				view.NewViewData(group, errorsmap.New()),
+				view.NewViewData(group, errorsmap.New()), sports,
 				templ.Attributes{"target": "#content", "hx-patch": reverse(ctx, "group.update", id)}), nil)
 		}
 		req := service.Request{"id": id}
