@@ -41,7 +41,7 @@ func (a App) Run() {
 		e.Router.Use(middleware.Recover())
 		e.Router.Use(session.LoadAndSave(session.SessionManager))
 
-		e.Router.Static("/static", "static")
+		e.Router.Static("/static", "public")
 		e.Router.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, base.Index(), nil) })
 		groupHandler := group.NewGroupHandler(app.Dao(), app.Settings().Meta.AppUrl)
 		g := e.Router.Group("/group")

@@ -95,40 +95,41 @@ templ GroupDetailView(g models.Group) {
 				<h2>{ g.Name }</h2>
 				<p><pre style="background-color:white;">{ g.Description }</pre></p>
 			</section>
-			<section>
-				<nav>
-					<span role="group">
+			<section class="selection">
+				<span role="group">
+					<a
+						id="#stats"
+						href="#stats"
+						class=""
+						role="button"
+						hx-target="#content"
+						hx-get={ view.Reverse(ctx, "stat.list", g.ID) }
+					>
+						<i class="fa-regular fa-chart-bar"></i> Stats
+					</a>
+					if strings.EqualFold(xsession.GetUser(ctx).ID,g.User) {
 						<a
-							href="#stats"
+							id="#members"
+							href="#members"
 							class="outline"
 							role="button"
 							hx-target="#content"
-							hx-get={ view.Reverse(ctx, "stat.list", g.ID) }
+							hx-get={ view.Reverse(ctx, "member.list", g.ID) }
 						>
-							<i class="fa-regular fa-chart-bar"></i> Stats
+							<i class="fa-solid fa-users"></i> Members
 						</a>
-						if strings.EqualFold(xsession.GetUser(ctx).ID,g.User) {
-							<a
-								href="#members"
-								class="outline"
-								role="button"
-								hx-target="#content"
-								hx-get={ view.Reverse(ctx, "member.list", g.ID) }
-							>
-								<i class="fa-solid fa-users"></i> Members
-							</a>
-							<a
-								href="#seasons"
-								class="outline"
-								role="button"
-								hx-target="#content"
-								hx-get={ view.Reverse(ctx, "season.list", g.ID) }
-							>
-								<i class="fa-solid fa-calendar-days"></i> Seasons
-							</a>
-						}
-					</span>
-				</nav>
+						<a
+							id="#seasons"
+							href="#seasons"
+							class="outline"
+							role="button"
+							hx-target="#content"
+							hx-get={ view.Reverse(ctx, "season.list", g.ID) }
+						>
+							<i class="fa-solid fa-calendar-days"></i> Seasons
+						</a>
+					}
+				</span>
 			</section>
 			<section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.ID) } hx-target="#content"></section>
 		}

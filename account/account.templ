@@ -94,29 +94,29 @@ templ ProfileView(user UserModel) {
 			<section>
 				<h2>{ user.Email }</h2>
 			</section>
-			<section>
-				<nav>
-					<span role="group">
-						<a
-							href="#profile"
-							class="outline"
-							role="button"
-							hx-target="#content"
-							hx-get={ view.Reverse(ctx, "account.update", user.ID) }
-						>
-							<i class="fa-solid fa-user-pen"></i> Edit profile
-						</a>
-						<a
-							href="#groups"
-							class="outline"
-							role="button"
-							hx-target="#content"
-							hx-get={ view.WithQS(view.Reverse(ctx, "account.groups", user.ID), map[string]string{"owner": user.ID}) }
-						>
-							<i class="fa-solid fa-users-between-lines"></i> Manage groups
-						</a>
-					</span>
-				</nav>
+			<section class="selection">
+				<span role="group">
+					<a
+						id="#groups"
+						href="#groups"
+						class=""
+						role="button"
+						hx-target="#content"
+						hx-get={ view.WithQS(view.Reverse(ctx, "account.groups", user.ID), map[string]string{"owner": user.ID}) }
+					>
+						<i class="fa-solid fa-users-between-lines"></i> Manage groups
+					</a>
+					<a
+						id="#profile"
+						href="#profile"
+						class="outline"
+						role="button"
+						hx-target="#content"
+						hx-get={ view.Reverse(ctx, "account.update", user.ID) }
+					>
+						<i class="fa-solid fa-user-pen"></i> Edit profile
+					</a>
+				</span>
 			</section>
 			<section
 				id="content"
