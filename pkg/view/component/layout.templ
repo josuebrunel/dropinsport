@@ -1,0 +1,52 @@
+package component
+
+// HTML tag
+templ HTML(attr templ.Attributes) {
+	<html { attr... }>
+		{ children... }
+	</html>
+}
+
+// HEADER
+templ Head() {
+	<head>
+		{ children... }
+	</head>
+}
+
+templ Title(title string) {
+	<title>{ title }</title>
+}
+
+templ LinkStyle(href string, attr templ.Attributes) {
+	<link rel="stylesheet" href={ href } { attr... }/>
+}
+
+templ Styles() {
+	{ children... }
+}
+
+// BODY
+templ Body(attr templ.Attributes) {
+	<body { attr... }>
+		{ children... }
+	</body>
+}
+
+templ Header(attr templ.Attributes) {
+	<header { attr... }>
+		{ children... }
+	</header>
+}
+
+templ Main(attr templ.Attributes) {
+	<main { attr... }>
+		{ children... }
+	</main>
+}
+
+templ Footer(attr templ.Attributes) {
+	<footer { attr... }>
+		{ children... }
+	</footer>
+}

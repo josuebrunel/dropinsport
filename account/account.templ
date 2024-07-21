@@ -17,8 +17,8 @@ templ FormView(err errorsmap.EMap, attr templ.Attributes) {
 }
 
 templ LoginFormView(r errorsmap.EMap, attr templ.Attributes) {
-	@base.Head("Login")
-	@base.Body() {
+	@base.Layout("Login") {
+		@base.Header()
 		@base.Main(templ.Attributes{}) {
 			if !r.IfNil("error") {
 				@component.Error(r.Get("error"))
@@ -43,8 +43,6 @@ templ LoginFormView(r errorsmap.EMap, attr templ.Attributes) {
 			}
 		}
 	}
-	@base.Footer()
-	@base.Scripts()
 }
 
 templ EditFormView(user UserModel, r errorsmap.EMap, attr templ.Attributes) {
@@ -81,18 +79,17 @@ templ EditFormView(user UserModel, r errorsmap.EMap, attr templ.Attributes) {
 }
 
 templ RegisterFormView(r errorsmap.EMap, attr templ.Attributes) {
-	@base.Head("Registration")
-	@base.Body() {
+	@base.Layout("Registration") {
+		@base.Header()
 		@base.Main(templ.Attributes{}) {
 			@EditFormView(UserModel{}, r, attr)
 		}
 	}
-	@base.Footer()
 }
 
 templ ProfileView(user UserModel) {
-	@base.Head(user.Username)
-	@base.Body() {
+	@base.Layout(user.Username) {
+		@base.Header()
 		@base.Main(templ.Attributes{}) {
 			<section>
 				<h2>{ user.Email }</h2>
@@ -128,8 +125,6 @@ templ ProfileView(user UserModel) {
 				hx-get={ view.WithQS(view.Reverse(ctx, "account.groups", user.ID), map[string]string{"user": user.ID}) }
 			></section>
 		}
-		@base.Footer()
-		@base.Scripts()
 	}
 }
 
@@ -152,8 +147,11 @@ templ GroupListView(gg []models.Group, attr templ.Attributes) {
 		<tbody>
 			for _, g := range gg {
 				<tr>
-					<td><strong>@component.Link(g.Name, view.Reverse(ctx, "group.get", g.ID), templ.Attributes{})
-</strong></td>
+					<td>
+						<strong>
+							@component.Link(g.Name, view.Reverse(ctx, "group.get", g.ID), templ.Attributes{})
+						</strong>
+					</td>
 					<td>{ g.Street }</td>
 					<td>{ g.City }</td>
 					<td>{ g.Country }</td>

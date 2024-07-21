@@ -1,11 +1,21 @@
 package component
 
+func AttrMerge(attrs ...templ.Attributes) templ.Attributes {
+	attr := templ.Attributes{}
+	for _, a := range attrs {
+		for k, v := range a {
+			attr[k] = v
+		}
+	}
+	return attr
+}
+
 templ If(cond bool, comp templ.Component) {
-    if cond {
-        @comp
-    }
+	if cond {
+		@comp
+	}
 }
 
 templ Link(name, href string, attr templ.Attributes) {
-    <a href={ templ.URL(href)} {attr...}>{name}</a>
+	<a href={ templ.URL(href) } { attr... }>{ name }</a>
 }

@@ -22,10 +22,6 @@ templ GroupFormView(r view.ViewData[service.Record], sports view.ViewData[servic
 		@component.InputCSRF(view.Get[string](ctx, "csrf"))
 		@component.InputHidden("user", xsession.GetUser(ctx).ID)
 		<div>
-			// @component.InputWithLabel("sport", templ.Attributes{"type": "text", "name": "sport", "value": r.V().GetString("sport"), "required": true})
-			// if !r.ErrNil("sport") {
-			// 	@component.Error(r.ErrGet("sport"))
-			// }
 			@SportListView(sports, r.V().GetString("sport"))
 		</div>
 		<div>
@@ -92,8 +88,8 @@ templ GroupListView(gg view.ViewData[service.RecordSlice]) {
 }
 
 templ GroupDetailView(g models.Group) {
-	@base.Head(g.Name)
-	@base.Body() {
+	@base.Layout(g.Name) {
+		@base.Header()
 		@base.Main(templ.Attributes{}) {
 			<section>
 				<h2>{ g.Name }</h2>
@@ -136,8 +132,6 @@ templ GroupDetailView(g models.Group) {
 			</section>
 			<section id="content" hx-trigger="load" hx-get={ view.Reverse(ctx, "stat.list", g.ID) } hx-target="#content"></section>
 		}
-		@base.Footer()
-		@base.Scripts()
 	}
 }
 

@@ -6,19 +6,62 @@ import (
 	"github.com/josuebrunel/sportdropin/pkg/xsession"
 )
 
-templ Head(title string) {
-	<head>
-		<meta charset="UTF-8"/>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<title>{ title }</title>
-		@Styles()
-	</head>
+templ Header() {
+	@component.Header(templ.Attributes{"class": "container"}) {
+		<nav>
+			<ul>
+				<li>
+					<h2><a href="/"><strong>SPORTIX</strong></a></h2>
+				</li>
+			</ul>
+			<ul>
+				@AccountMenu()
+			</ul>
+		</nav>
+		{ children... }
+		<hr/>
+	}
 }
 
-templ Styles() {
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@next/css/pico.min.css"/>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-	<link rel="stylesheet" href="/static/css/styles.css" type="text/css" media="screen" charset="utf-8"/>
+templ Main(attr templ.Attributes) {
+	@component.Main(component.AttrMerge(templ.Attributes{"class": "container"}, attr)) {
+		{ children... }
+	}
+}
+
+templ SearchBar() {
+	<form role="search" hx-get="/group" hx-trigger="click" hx-target="#container">
+		<input type="search" name="search" id="search" placeholder="Search"/>
+	</form>
+}
+
+templ Layout(title string) {
+	@component.HTML(templ.Attributes{"lang": "en"}) {
+		@component.Head() {
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			@component.Title(title)
+			@component.Styles() {
+				@component.LinkStyle("https://cdn.jsdelivr.net/npm/@picocss/pico@next/css/pico.min.css", templ.Attributes{})
+				@component.LinkStyle("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css", templ.Attributes{})
+				@component.LinkStyle("/static/css/styles.css", templ.Attributes{"type": "text/css", "media": "screen", "charset": "utf-8"})
+			}
+		}
+		@component.Body(templ.Attributes{}) {
+			{ children... }
+			<script src="https://unpkg.com/htmx.org@2.0.0"></script>
+			@component.Footer(templ.Attributes{})
+		}
+	}
+}
+
+templ Index() {
+	@Layout("Sportix") {
+		@Header() {
+			@SearchBar()
+		}
+		@component.Main(templ.Attributes{"class": "container", "id": "container", "hx-trigger": "load", "hx-get": "/group"})
+	}
 }
 
 templ AccountMenu() {
@@ -36,55 +79,4 @@ templ AccountMenu() {
 			</ul>
 		</details>
 	}
-}
-
-templ Header() {
-	<header class="container">
-		<nav>
-			<ul>
-				<li>
-					<h2><a href="/"><strong>SPORTIX</strong></a></h2>
-				</li>
-			</ul>
-			<ul>
-				@AccountMenu()
-			</ul>
-		</nav>
-		<form role="search" hx-get="/group" hx-trigger="click" hx-target="#container">
-			<input type="search" name="search" id="search" placeholder="Search"/>
-		</form>
-		<hr/>
-	</header>
-}
-
-templ Scripts() {
-	<script src="https://unpkg.com/htmx.org@2.0.0"></script>
-}
-
-templ Footer() {
-	<footer></footer>
-}
-
-templ Body() {
-	<body>
-		@Header()
-		{ children... }
-		@Scripts()
-		@Footer()
-	</body>
-}
-
-templ Main(attr templ.Attributes) {
-	<main class="container" { attr... }>
-		{ children... }
-	</main>
-}
-
-templ Index() {
-	<html lang="en">
-		@Head("Sportix")
-		@Body() {
-			@Main(templ.Attributes{"id": "container", "hx-trigger": "load", "hx-get": "/group"})
-		}
-	</html>
 }

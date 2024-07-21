@@ -8,6 +8,16 @@ package component
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+func AttrMerge(attrs ...templ.Attributes) templ.Attributes {
+	attr := templ.Attributes{}
+	for _, a := range attrs {
+		for k, v := range a {
+			attr[k] = v
+		}
+	}
+	return attr
+}
+
 func If(cond bool, comp templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -78,7 +88,7 @@ func Link(name, href string, attr templ.Attributes) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/view/component/component.templ`, Line: 10, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/view/component/component.templ`, Line: 20, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
