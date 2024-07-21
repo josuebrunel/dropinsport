@@ -46,9 +46,9 @@ func formDataToRequests(groupID, seasonID string, formData map[string]any, schem
 			// process stat fields
 			if collection.Exists(schema, func(s map[string]string) bool { return strings.EqualFold(s["abbr"], fname) }) {
 				if v, ok := stats[id]; ok {
-					v[fname] = util.F64Fmt(util.AssertType[float64](value), "%.1f")
+					v[fname] = util.F64Fmt(util.AssertType[float64](value), "%.f")
 				} else {
-					stats[id] = map[string]string{fname: util.F64Fmt(util.AssertType[float64](value), "%1.f")}
+					stats[id] = map[string]string{fname: util.F64Fmt(util.AssertType[float64](value), "%.f")}
 				}
 				// process request fields
 			} else {
