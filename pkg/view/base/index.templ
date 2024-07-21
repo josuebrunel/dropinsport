@@ -72,12 +72,11 @@ templ AccountMenu() {
 			@component.Link(xsession.GetUser(ctx).Email, view.Reverse(ctx, "account.get", xsession.GetUser(ctx).ID), templ.Attributes{})
 		</p>
 	} else {
-		<details class="dropdown">
-			<summary><i class="fa-solid fa-bars"></i> </summary>
-			<ul>
-				@component.Link("Sign in", view.Reverse(ctx, "account.login"), templ.Attributes{})
-				@component.Link("Sign up", view.Reverse(ctx, "account.register"), templ.Attributes{})
-			</ul>
-		</details>
+		<ul>
+			<li>@component.Link("Sign in", view.Reverse(ctx, "account.login"), templ.Attributes{})
+</li>
+			<li>@component.Link("Sign up", view.Reverse(ctx, "account.register"), templ.Attributes{})
+</li>
+		</ul>
 	}
 }
