@@ -1,5 +1,34 @@
 package collection
 
+func Get[T any](list []T, fn func(T) bool) *T {
+	for _, i := range list {
+		if fn(i) {
+			return &i
+		}
+	}
+	return nil
+}
+
+func Delete[T any](list []T, fn func(T) bool) []T {
+	result := make([]T, 0)
+	for _, i := range list {
+		if !fn(i) {
+			result = append(result, i)
+		}
+	}
+	return result
+}
+
+func Filter[T any](list []T, fn func(T) bool) []T {
+	result := make([]T, 0)
+	for _, i := range list {
+		if fn(i) {
+			result = append(result, i)
+		}
+	}
+	return result
+}
+
 func Exists[T any](list []T, fn func(t T) bool) bool {
 	var r bool
 	for _, i := range list {
