@@ -42,14 +42,14 @@ templ Layout(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			@component.Title(title)
 			@component.Styles() {
-				@component.LinkStyle("https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.blue.min.css", templ.Attributes{})
+				@component.LinkStyle("/static/css/pico.min.css", templ.Attributes{})
 				@component.LinkStyle("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css", templ.Attributes{})
 				@component.LinkStyle("/static/css/style.css", templ.Attributes{"type": "text/css", "media": "screen", "charset": "utf-8"})
 			}
 		}
 		@component.Body(templ.Attributes{}) {
 			{ children... }
-			<script src="https://unpkg.com/htmx.org@2.0.0"></script>
+			<script src="/static/js/htmx.min.js"></script>
 			<script src="/static/js/sportix.js"></script>
 			@component.Footer(templ.Attributes{})
 		}
@@ -73,10 +73,12 @@ templ AccountMenu() {
 		</p>
 	} else {
 		<ul>
-			<li>@component.Link("Sign in", view.Reverse(ctx, "account.login"), templ.Attributes{})
-</li>
-			<li>@component.Link("Sign up", view.Reverse(ctx, "account.register"), templ.Attributes{})
-</li>
+			<li>
+				@component.Link("Sign in", view.Reverse(ctx, "account.login"), templ.Attributes{})
+			</li>
+			<li>
+				@component.Link("Sign up", view.Reverse(ctx, "account.register"), templ.Attributes{})
+			</li>
 		</ul>
 	}
 }
