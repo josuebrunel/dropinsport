@@ -14,6 +14,8 @@ type xcontextkey string
 
 var xc xcontextkey = "xcontext"
 
+type QS = map[string]string
+
 type ViewData[T any] struct {
 	Data   T
 	Errors map[string]error

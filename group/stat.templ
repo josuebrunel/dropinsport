@@ -2,7 +2,8 @@ package group
 
 import (
 	"fmt"
-	"github.com/josuebrunel/sportdropin/pkg/service"
+	"github.com/josuebrunel/sportdropin/pkg/collection"
+	"github.com/josuebrunel/sportdropin/pkg/models"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
 	"github.com/josuebrunel/sportdropin/pkg/xsession"
@@ -13,10 +14,17 @@ func genFieldName(prefix, value string) string {
 	return fmt.Sprintf("%s:%s", prefix, value)
 }
 
-templ GroupStatForm(schema SportStatSchema, members []map[string]string, attr templ.Attributes) {
+templ GroupStatForm(group models.Group, schema SportStatSchema, members []map[string]string, attr templ.Attributes) {
 	<h3>Stats</h3>
 	<form { attr... }>
 		@component.InputCSRF(view.Get[string](ctx, "csrf"))
+		@component.SelectWithLabel("seasons", component.Select(
+			templ.Attributes{"name": "season", "hx-target": "#content", "hx-get": view.Reverse(ctx, "stat.create", group.ID)},
+			collection.ToMap(group.Expand.Seasons, func(r models.Season) (string, string) {
+				return r.Name, r.ID
+			}),
+			group.ExtraGet("curseason"),
+		))
 		<table>
 			<thead>
 				<tr>
@@ -51,13 +59,20 @@ templ GroupStatForm(schema SportStatSchema, members []map[string]string, attr te
 	</form>
 }
 
-templ GroupStatList(group service.Record, stats []map[string]string, schema SportStatSchema) {
+templ GroupStatList(group models.Group, stats []map[string]string, schema SportStatSchema) {
 	<h3>
 		Stats
-		if strings.EqualFold(xsession.GetUser(ctx).ID, group.GetString("user")) {
-			<i class="fa-regular fa-pen-to-square button" hx-get={ view.Reverse(ctx, "stat.create", group.GetId()) } hx-target="#content" role="button"></i>
+		if strings.EqualFold(xsession.GetUser(ctx).ID, group.Expand.User.ID) {
+			<i class="fa-regular fa-pen-to-square button" hx-get={ view.Reverse(ctx, "stat.create", group.ID) } hx-target="#content" role="button"></i>
 		}
 	</h3>
+	@component.SelectWithLabel("seasons", component.Select(
+		templ.Attributes{"name": "season", "hx-target": "#content", "hx-get": view.Reverse(ctx, "stat.list", group.ID)},
+		collection.ToMap(group.Expand.Seasons, func(r models.Season) (string, string) {
+			return r.Name, r.ID
+		}),
+		group.ExtraGet("curseason"),
+	))
 	<table>
 		<thead>
 			<tr>

@@ -1,5 +1,23 @@
 package models
 
+type IModel interface {
+	ExtraGet(string) string
+}
+
+type Extra map[string]string
+
+func (e Extra) ExtraSet(k, v string) {
+	if len(e) == 0 {
+		e = Extra{k: v}
+		return
+	}
+	e[k] = v
+}
+
+func (e Extra) ExtraGet(k string) string {
+	return e[k]
+}
+
 type Collection[T any] struct {
 	Page       int `json:"page"`
 	PerPage    int `json:"perPage"`
@@ -51,6 +69,7 @@ type Sport struct {
 }
 
 type Group struct {
+	Extra          `json:"extra"`
 	ID             string `json:"id,omitempty" form:"id"`
 	User           string `json:"user" form:"user"`
 	City           string `json:"city" form:"city"`
@@ -64,6 +83,7 @@ type Group struct {
 	Street         string `json:"street" form:"street"`
 	Updated        string `json:"updated" form:"updated"`
 	Expand         struct {
+		User    User     `json:"user" form:"user"`
 		Members []Member `json:"members_via_group" form:"members_via_group"`
 		Seasons []Season `json:"seasons_via_group" form:"seasons_via_group"`
 		Sport   Sport    `json:"sport" form:"sport"`

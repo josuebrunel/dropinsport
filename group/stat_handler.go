@@ -8,6 +8,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/josuebrunel/sportdropin/pkg/collection"
+	"github.com/josuebrunel/sportdropin/pkg/models"
 	"github.com/josuebrunel/sportdropin/pkg/service"
 	"github.com/josuebrunel/sportdropin/pkg/util"
 	"github.com/josuebrunel/sportdropin/pkg/view"
@@ -65,7 +66,7 @@ func formDataToRequests(groupID, seasonID string, formData map[string]any, schem
 	for i, v := range requests {
 		v["member"] = i
 		v["group"] = groupID
-		v["season"] = seasonID
+		v["season"] = formData["season"]
 		if s, ok := stats[i]; ok {
 			js, err := json.Marshal(&s)
 			if err != nil {
@@ -82,28 +83,38 @@ func formDataToRequests(groupID, seasonID string, formData map[string]any, schem
 func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		groupID := ctx.PathParam(h.svc.GetID())
+		group, _ := h.GetGroup(groupID)
 		schema := h.GetGroupSportStatSchema(context, groupID)
-		curSeason, err := h.GetGroupCurrentSeason(context, groupID)
-		if err != nil {
-			xlog.Error("error while getting current season", "group", groupID, "error", err)
-			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
+		seasonID := ctx.QueryParam("season")
+		if strings.EqualFold(seasonID, "") {
+			curSeason, err := h.GetGroupCurrentSeason(context, groupID)
+			if err != nil {
+				xlog.Error("error while getting current season", "group", groupID, "error", err)
+				return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
+			}
+			seasonID = curSeason.GetId()
 		}
+		var err error
 		if ctx.Request().Method == http.MethodGet {
 			members, err := memberSVC.ListWithBackRel(
 				context, service.Filters{"group": groupID},
 				service.BackRel{
-					"memberstats": map[string]any{"member": ":id", "group": groupID, "season": curSeason.GetId()},
+					"memberstats": map[string]any{"member": ":id", "group": groupID, "season": seasonID},
 				},
 			)
 			if err != nil {
 				xlog.Error("error while getting members and stats", "group", groupID, "error", err)
 				return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 			}
+			var m models.Group
+			_ = service.UnmarshalTo(group, &m)
+			m.Extra = models.Extra{"curseason": seasonID}
+
 			data := memberStatsToData(schema, members.V())
 			xlog.Debug("members stats", "stats", data)
 			return view.Render(ctx, http.StatusOK,
 				GroupStatForm(
-					schema, data,
+					m, schema, data,
 					templ.Attributes{"hx-post": ctx.RouteInfo().Reverse(groupID), "hx-target": "#content"}),
 				nil)
 		}
@@ -112,8 +123,8 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 
-		group, _ := h.GetGroup(groupID)
-		reqs := formDataToRequests(groupID, curSeason.GetId(), req, schema)
+		seasonID = req["season"].(string)
+		reqs := formDataToRequests(groupID, seasonID, req, schema)
 		xlog.Debug("request data", "requests", reqs)
 		_, err = statSVC.BulkUpsert(context, reqs)
 		if err != nil {
@@ -123,7 +134,7 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 		members, err := memberSVC.ListWithBackRel(
 			context, service.Filters{"group": groupID},
 			service.BackRel{
-				"memberstats": map[string]any{"member": ":id", "group": groupID, "season": curSeason.GetId()},
+				"memberstats": map[string]any{"member": ":id", "group": groupID, "season": seasonID},
 			},
 		)
 		if err != nil {
@@ -132,7 +143,10 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 		}
 		data := memberStatsToData(schema, members.V())
 		xlog.Debug("members stats", "stats", data)
-		return view.Render(ctx, http.StatusOK, GroupStatList(group, data, schema), nil)
+		var m models.Group
+		_ = service.UnmarshalTo(group, &m)
+		m.Extra = models.Extra{"curseason": seasonID}
+		return view.Render(ctx, http.StatusOK, GroupStatList(m, data, schema), nil)
 	}
 }
 
@@ -140,15 +154,20 @@ func (h GroupHandler) StatList(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		groupID := ctx.PathParam(h.svc.GetID())
 		group, _ := h.GetGroup(groupID)
-		curSeason, err := h.GetGroupCurrentSeason(context, groupID)
-		if err != nil {
-			xlog.Error("error while getting current season", "group", groupID, "error", err)
-			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
+		seasonID := ctx.QueryParam("season")
+		if strings.EqualFold(seasonID, "") {
+			curSeason, err := h.GetGroupCurrentSeason(context, groupID)
+			if err != nil {
+				xlog.Error("error while getting current season", "group", groupID, "error", err)
+				return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
+			}
+			seasonID = curSeason.GetId()
 		}
+
 		members, err := memberSVC.ListWithBackRel(
 			context, service.Filters{"group": groupID},
 			service.BackRel{
-				"memberstats": map[string]any{"member": ":id", "group": groupID, "season": curSeason.GetId()},
+				"memberstats": map[string]any{"member": ":id", "group": groupID, "season": seasonID},
 			},
 		)
 		if err != nil {
@@ -156,9 +175,12 @@ func (h GroupHandler) StatList(context context.Context) echo.HandlerFunc {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
 		schema := h.GetGroupSportStatSchema(context, groupID)
-		xlog.Debug("members and stats", "members", members, "schema", schema, "group")
+		xlog.Debug("members and stats", "members", members, "schema", schema, "group", group)
 		data := memberStatsToData(schema, members.V())
+		var m models.Group
+		_ = service.UnmarshalTo(group, &m)
+		m.Extra = models.Extra{"curseason": seasonID}
 		xlog.Debug("stats", "stats", data)
-		return view.Render(ctx, http.StatusOK, GroupStatList(group, data, schema), nil)
+		return view.Render(ctx, http.StatusOK, GroupStatList(m, data, schema), nil)
 	}
 }

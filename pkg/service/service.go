@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -290,4 +291,16 @@ func (s Service) FindRecordsByExpr(ctx context.Context, name string, filters dbx
 		return records
 	}
 	return records
+}
+
+func UnmarshalTo(r Record, m any) error {
+	b, err := r.MarshalJSON()
+	if err != nil {
+		xlog.Error("failed to marshal json", "collection", r.Collection(), "id", r.GetId())
+		return err
+	}
+	if err = json.Unmarshal(b, m); err != nil {
+		xlog.Error("failed to unmarshal record to target", "collection", r.Collection(), "id", r.GetId())
+	}
+	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/josuebrunel/sportdropin/pkg/errorsmap"
@@ -53,7 +54,7 @@ func NewGroupHandler(db *daos.Dao, url string) *GroupHandler {
 }
 
 func (h GroupHandler) GetGroup(id string) (service.Record, error) {
-	v, err := h.svc.GetByID(context.Background(), id, "sport")
+	v, err := h.svc.GetByID(context.Background(), id, "user", "sport", "seasons_via_group")
 	if err != nil {
 		xlog.Error("error while getting group", "group", id, "error", err)
 	}
@@ -75,6 +76,7 @@ func (h GroupHandler) GetGroupSportStatSchema(ctx context.Context, groupID strin
 func (h GroupHandler) GetGroupCurrentSeason(ctx context.Context, groupID string) (service.Record, error) {
 	seasons, err := seasonSVC.List(ctx, map[string]any{"group": groupID})
 	if err != nil {
+		xlog.Debug("failed to get group seasons", "group", groupID)
 		return seasonSVC.GetNewRecord(), err
 	}
 	if len(seasons.Data) == 0 {
@@ -85,12 +87,12 @@ func (h GroupHandler) GetGroupCurrentSeason(ctx context.Context, groupID string)
 	})
 	var currentSeason service.Record
 	for _, season := range seasons.Data {
-		if season.GetString("status") == SeasonStatusInProgress {
+		if strings.EqualFold(season.GetString("status"), SeasonStatusInProgress) {
 			currentSeason = season
 			break
 		}
 	}
-	if currentSeason == nil {
+	if currentSeason == nil && len(seasons.Data) > 0 {
 		currentSeason = seasons.Data[0]
 	}
 	return currentSeason, nil
@@ -130,7 +132,7 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 			xlog.Error("group-handler-create", "errors", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		resp, err := h.svc.List(context, map[string]any{})
+		resp, err := h.svc.List(context, map[string]any{}, "sport")
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
@@ -175,7 +177,7 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		resp, err := h.svc.List(context, map[string]any{})
+		resp, err := h.svc.List(context, map[string]any{}, "sport")
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}

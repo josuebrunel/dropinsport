@@ -10,7 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/josuebrunel/sportdropin/pkg/service"
+	"github.com/josuebrunel/sportdropin/pkg/collection"
+	"github.com/josuebrunel/sportdropin/pkg/models"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/component"
 	"github.com/josuebrunel/sportdropin/pkg/xsession"
@@ -21,7 +22,7 @@ func genFieldName(prefix, value string) string {
 	return fmt.Sprintf("%s:%s", prefix, value)
 }
 
-func GroupStatForm(schema SportStatSchema, members []map[string]string, attr templ.Attributes) templ.Component {
+func GroupStatForm(group models.Group, schema SportStatSchema, members []map[string]string, attr templ.Attributes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -55,6 +56,16 @@ func GroupStatForm(schema SportStatSchema, members []map[string]string, attr tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = component.SelectWithLabel("seasons", component.Select(
+			templ.Attributes{"name": "season", "hx-target": "#content", "hx-get": view.Reverse(ctx, "stat.create", group.ID)},
+			collection.ToMap(group.Expand.Seasons, func(r models.Season) (string, string) {
+				return r.Name, r.ID
+			}),
+			group.ExtraGet("curseason"),
+		)).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table><thead><tr><th>Nickname</th>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -67,7 +78,7 @@ func GroupStatForm(schema SportStatSchema, members []map[string]string, attr tem
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(field["name"])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 25, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 33, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -80,7 +91,7 @@ func GroupStatForm(schema SportStatSchema, members []map[string]string, attr tem
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(field["abbr"])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 25, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 33, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -103,7 +114,7 @@ func GroupStatForm(schema SportStatSchema, members []map[string]string, attr tem
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(m["username"])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 33, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 41, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -161,7 +172,7 @@ func GroupStatForm(schema SportStatSchema, members []map[string]string, attr tem
 	})
 }
 
-func GroupStatList(group service.Record, stats []map[string]string, schema SportStatSchema) templ.Component {
+func GroupStatList(group models.Group, stats []map[string]string, schema SportStatSchema) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -183,15 +194,15 @@ func GroupStatList(group service.Record, stats []map[string]string, schema Sport
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if strings.EqualFold(xsession.GetUser(ctx).ID, group.GetString("user")) {
+		if strings.EqualFold(xsession.GetUser(ctx).ID, group.Expand.User.ID) {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<i class=\"fa-regular fa-pen-to-square button\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "stat.create", group.GetId()))
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "stat.create", group.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 58, Col: 105}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 66, Col: 100}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -202,7 +213,21 @@ func GroupStatList(group service.Record, stats []map[string]string, schema Sport
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3><table><thead><tr><th>Nickname</th>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = component.SelectWithLabel("seasons", component.Select(
+			templ.Attributes{"name": "season", "hx-target": "#content", "hx-get": view.Reverse(ctx, "stat.list", group.ID)},
+			collection.ToMap(group.Expand.Seasons, func(r models.Season) (string, string) {
+				return r.Name, r.ID
+			}),
+			group.ExtraGet("curseason"),
+		)).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table><thead><tr><th>Nickname</th>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -214,7 +239,7 @@ func GroupStatList(group service.Record, stats []map[string]string, schema Sport
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(field["name"])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 66, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 81, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -227,7 +252,7 @@ func GroupStatList(group service.Record, stats []map[string]string, schema Sport
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(field["abbr"])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 66, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 81, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -250,7 +275,7 @@ func GroupStatList(group service.Record, stats []map[string]string, schema Sport
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(m["username"])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 73, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 88, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -268,7 +293,7 @@ func GroupStatList(group service.Record, stats []map[string]string, schema Sport
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(m[f["abbr"]])
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 75, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/stat.templ`, Line: 90, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {

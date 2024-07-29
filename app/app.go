@@ -72,7 +72,7 @@ func (a App) Run() {
 		g.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:groupid/member/:memberid", Handler: groupHandler.MemberDelete(ctx), Name: "member.delete"})
 		// STATS
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/stat/create", Handler: groupHandler.StatCreate(ctx), Name: "stat.create"})
-		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/:groupid/stat/create", Handler: groupHandler.StatCreate(ctx), Name: "stat.created"})
+		g.AddRoute(echo.Route{Method: http.MethodPost, Path: "/:groupid/stat/create", Handler: groupHandler.StatCreate(ctx), Name: "stat.create"})
 		g.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:groupid/stat/", Handler: groupHandler.StatList(ctx), Name: "stat.list"})
 		// ACCOUNTS
 		accountHandler := account.NewAccountHandler(app.App.Settings().Meta.AppUrl)
