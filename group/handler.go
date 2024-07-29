@@ -132,11 +132,7 @@ func (h GroupHandler) Create(context context.Context) echo.HandlerFunc {
 			xlog.Error("group-handler-create", "errors", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		resp, err := h.svc.List(context, map[string]any{}, "sport")
-		if err != nil {
-			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
-		}
-		return view.Render(ctx, http.StatusOK, GroupListView(resp), nil)
+		return ctx.Redirect(http.StatusFound, view.ReverseX(ctx, "account.get", xsession.GetUser(ctx.Request().Context()).ID))
 	}
 
 }
@@ -152,7 +148,7 @@ func (h GroupHandler) Get(context context.Context) echo.HandlerFunc {
 		}
 		group := pb.ResponseTo[models.Group](resp)
 		xlog.Debug("get group", "group", group)
-		return view.Render(ctx, http.StatusOK, GroupDetailView(group), nil)
+		return view.Render(ctx, http.StatusSeeOther, GroupDetailView(group), nil)
 	}
 }
 
@@ -177,11 +173,7 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 		if err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		resp, err := h.svc.List(context, map[string]any{}, "sport")
-		if err != nil {
-			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
-		}
-		return view.Render(ctx, http.StatusOK, GroupListView(resp), nil)
+		return ctx.Redirect(http.StatusSeeOther, view.ReverseX(ctx, "account.get", xsession.GetUser(ctx.Request().Context()).ID))
 	}
 }
 
@@ -205,11 +197,7 @@ func (h GroupHandler) Delete(context context.Context) echo.HandlerFunc {
 		if err := h.svc.Delete(context, id); err != nil {
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		resp, err := h.svc.List(context, map[string]any{})
-		if err != nil {
-			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
-		}
-		return view.Render(ctx, http.StatusOK, GroupListView(resp), nil)
+		return ctx.Redirect(http.StatusSeeOther, view.ReverseX(ctx, "account.get", xsession.GetUser(ctx.Request().Context()).ID))
 
 	}
 }

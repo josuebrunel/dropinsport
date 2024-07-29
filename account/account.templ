@@ -131,7 +131,7 @@ templ ProfileView(user UserModel) {
 templ GroupListView(gg []models.Group, attr templ.Attributes) {
 	<h3>
 		Groups 
-		<i class="fa-solid fa-user-plus button" hx-get={ view.Reverse(ctx, "group.create") } hx-target="#content" role="button"></i>
+		<i class="fa-solid fa-square-plus button" hx-get={ view.Reverse(ctx, "group.create") } hx-target="#content" role="button"></i>
 	</h3>
 	@component.Table() {
 		<thead>
