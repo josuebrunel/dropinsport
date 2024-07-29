@@ -76,16 +76,13 @@ func (h GroupHandler) GetGroupSportStatSchema(ctx context.Context, groupID strin
 func (h GroupHandler) GetGroupCurrentSeason(ctx context.Context, groupID string) (service.Record, error) {
 	seasons, err := seasonSVC.List(ctx, map[string]any{"group": groupID})
 	if err != nil {
-		xlog.Debug("failed to get group seasons", "group", groupID)
+		xlog.Error("failed to get group seasons", "group", groupID)
 		return seasonSVC.GetNewRecord(), err
-	}
-	if len(seasons.Data) == 0 {
-		return nil, nil
 	}
 	sort.Slice(seasons.Data, func(i, j int) bool {
 		return seasons.Data[i].GetString("end_date") < seasons.Data[j].GetString("end_date")
 	})
-	var currentSeason service.Record
+	var currentSeason = seasonSVC.GetNewRecord()
 	for _, season := range seasons.Data {
 		if strings.EqualFold(season.GetString("status"), SeasonStatusInProgress) {
 			currentSeason = season
