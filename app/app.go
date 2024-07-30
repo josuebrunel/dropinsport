@@ -3,22 +3,17 @@ package app
 import (
 	"log"
 	"net/http"
-	"os"
-	"strings"
 
 	"github.com/josuebrunel/sportdropin/account"
 	"github.com/josuebrunel/sportdropin/app/config"
 	"github.com/josuebrunel/sportdropin/group"
-	_ "github.com/josuebrunel/sportdropin/migrations"
 	"github.com/josuebrunel/sportdropin/pkg/view"
 	"github.com/josuebrunel/sportdropin/pkg/view/base"
 	"github.com/josuebrunel/sportdropin/pkg/xsession"
-	session "github.com/josuebrunel/sportdropin/pkg/xsession"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
 type App struct {
@@ -39,7 +34,7 @@ func (a App) Run() {
 		e.Router.Use(middleware.Logger())
 		e.Router.Use(middleware.CORS())
 		e.Router.Use(middleware.Recover())
-		e.Router.Use(session.LoadAndSave(session.SessionManager))
+		e.Router.Use(xsession.LoadAndSave(xsession.SessionManager))
 
 		e.Router.Static("/static", "public")
 		e.Router.GET("/", func(c echo.Context) error { return view.Render(c, http.StatusOK, base.Index(), nil) })
@@ -95,16 +90,6 @@ func (a App) Run() {
 			Middlewares: []echo.MiddlewareFunc{xsession.LoginRequired}})
 		// a.AddRoute(echo.Route{Method: http.MethodDelete, Path: "/:accountid", Handler: accountHandler.Delete(ctx), Name: "account.delete"})
 		return nil
-	})
-
-	// add migration command
-	// loosely check if it was executed using "go run"
-	isGoRun := strings.HasPrefix(os.Args[0], os.TempDir())
-
-	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
-		// enable auto creation of migration files when making collection changes in the Admin UI
-		// (the isGoRun check is to enable it only during development)
-		Automigrate: isGoRun,
 	})
 
 	if err := app.Start(); err != nil && err != http.ErrServerClosed {
