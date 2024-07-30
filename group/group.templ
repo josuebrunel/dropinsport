@@ -76,7 +76,7 @@ templ GroupListView(gg view.ViewData[service.RecordSlice]) {
 				<h3>
 					@component.Link(g.GetString("name"), view.Reverse(ctx, "group.get", g.GetId()), templ.Attributes{})
 					&nbsp;
-					(<i class={ g.ExpandedOne("sport").GetString("icon") }></i>)
+					(<abbr title={ g.ExpandedOne("sport").GetString("name") }><i class={ g.ExpandedOne("sport").GetString("icon") }></i></abbr>)
 				</h3>
 				<p><i>{ g.GetString("street") }, { g.GetString("city") }, { g.GetString("country") }</i></p>
 				<p>

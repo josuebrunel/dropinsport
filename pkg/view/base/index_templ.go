@@ -218,7 +218,7 @@ func Layout(title string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = component.LinkStyle("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = component.LinkStyle("https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css", templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
