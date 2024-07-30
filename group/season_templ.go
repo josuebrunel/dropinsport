@@ -34,7 +34,61 @@ func GroupSeasonForm(r view.ViewData[service.Record], attr templ.Attributes) tem
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h3>Seasons </h3><form hx-target=\"#content\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr><td>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = component.InputCSRF(view.Get[string](ctx, "csrf")).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = component.Input(templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = component.Select(
+			templ.Attributes{"name": "status"},
+			map[string]string{
+				"Scheduled":  "scheduled",
+				"Inprogress": "inprogress",
+				"Closed":     "closed",
+			},
+			r.V().GetString("status"),
+		).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = component.Input(
+			templ.Attributes{
+				"type": "date", "name": "start_date",
+				"id":    "start_date",
+				"value": r.V().GetDateTime("start_date").Time().Format(time.DateOnly)},
+		).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = component.Input(
+			templ.Attributes{
+				"type": "date", "name": "end_date",
+				"id":    "end_date",
+				"value": r.V().GetDateTime("end_date").Time().Format(time.DateOnly)},
+		).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td><span class=\"action\"><i class=\"fas fa-square-check button outline\" role=\"button\" hx-target=\"#content\" hx-include=\"closest tr\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -42,87 +96,20 @@ func GroupSeasonForm(r view.ViewData[service.Record], attr templ.Attributes) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></i> <i class=\"fas fa-square-xmark button outline\" style=\"color:grey;\" role=\"button\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if r.V().GetId() == "" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h5>Add a season </h5>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h5>Edit season ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(r.V().GetString("name"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 17, Col: 52}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h5>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "season.list", r.V().GetString("group")))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 57, Col: 72}
 		}
-		templ_7745c5c3_Err = component.InputCSRF(view.Get[string](ctx, "csrf")).Render(ctx, templ_7745c5c3_Buffer)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"grid\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = component.InputWithLabel("name", templ.Attributes{"type": "text", "name": "name", "value": r.V().GetString("name"), "required": true}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = component.SelectWithLabel("status", component.Select(
-			templ.Attributes{"name": "status"},
-			map[string]string{
-				"Scheduled":  "scheduled",
-				"Inprogress": "inprogress",
-				"Closed":     "closed",
-			},
-			r.V().GetString("status")),
-		).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"grid\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = component.InputWithLabel(
-			"start date", templ.Attributes{
-				"type": "date", "name": "start_date",
-				"id":    "start_date",
-				"value": r.V().GetDateTime("start_date").Time().Format(time.DateOnly)}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = component.InputWithLabel(
-			"end date", templ.Attributes{
-				"type": "date", "name": "end_date",
-				"id":    "end_date",
-				"value": r.V().GetDateTime("end_date").Time().Format(time.DateOnly)}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = component.ButtonSubmit("Save", templ.Attributes{"value": "save", "class": "primary"}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</form>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#content\"></i></span></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -148,24 +135,11 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h3>Seasons  <i class=\"fa-solid fa-calendar-plus button\" hx-get=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h3>Seasons </h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "season.create", groupID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 51, Col: 103}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#content\" role=\"button\"></i></h3>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -186,10 +160,23 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetString("name"))
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetString("name"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 66, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 82, Col: 30}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetString("status"))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 83, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -200,9 +187,9 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetString("status"))
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetDateTime("start_date").Time().Format(time.DateOnly))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 67, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 84, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -213,24 +200,11 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetDateTime("start_date").Time().Format(time.DateOnly))
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetDateTime("end_date").Time().Format(time.DateOnly))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 68, Col: 78}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 85, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(s.GetDateTime("end_date").Time().Format(time.DateOnly))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 69, Col: 76}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -238,12 +212,12 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var10 string
-				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "season.edit", groupID, s.GetId()))
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "season.edit", groupID, s.GetId()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 73, Col: 89}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 91, Col: 69}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -251,12 +225,12 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "season.delete", groupID, s.GetId()))
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "season.delete", groupID, s.GetId()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 78, Col: 94}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 99, Col: 74}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -264,12 +238,12 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")))
+				var templ_7745c5c3_Var11 string
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 80, Col: 101}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 101, Col: 81}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -278,13 +252,26 @@ func GroupSeasonList(groupID string, gg view.ViewData[service.RecordSlice]) temp
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr><td><i class=\"fa-regular fa-calendar\"></i></td><td></td><td></td><td></td><td><i class=\"fa-solid fa-calendar-plus button\" hx-get=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(view.Reverse(ctx, "season.create", groupID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `group/season.templ`, Line: 115, Col: 58}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"closest tr\" hx-swap=\"outerHTML\" role=\"button\"></i></td></tr></tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = component.Table().Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = component.Table().Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

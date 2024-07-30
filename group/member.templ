@@ -1,77 +1,109 @@
 package group
 
 import (
-    "fmt"
-    "github.com/josuebrunel/sportdropin/pkg/service"
-    "github.com/josuebrunel/sportdropin/pkg/view"
-    "github.com/josuebrunel/sportdropin/pkg/view/component"
+	"fmt"
+	"github.com/josuebrunel/sportdropin/pkg/service"
+	"github.com/josuebrunel/sportdropin/pkg/view"
+	"github.com/josuebrunel/sportdropin/pkg/view/component"
 )
 
 templ GroupMemberForm(r view.ViewData[service.Record], attr templ.Attributes) {
-    <h3>Members</h3>
-    <form hx-target="#content" {attr...} >
-        if r.V().GetId() == "" {
-            <h5>Add a member </h5>
-        } else {
-            <h5>Edit member {r.V().GetString("username")} </h5>
-        }
-        @component.InputCSRF(view.Get[string](ctx, "csrf"))
-        @component.InputWithLabel("Nickname",templ.Attributes{
-            "type": "text", "name": "username", 
-            "value": r.V().GetString("username"),
-            "required": true},
-        )
-        @component.InputWithLabel("Email",templ.Attributes{
-            "type": "email", "name": "email", 
-            "value": r.V().GetString("email"),
-        })
-        @component.InputWithLabel("Phone",templ.Attributes{
-            "type": "tel", "name": "phone", 
-            "value": r.V().GetString("phone"),
-        })   
-        @component.ButtonSubmit("Save", templ.Attributes{"value": "save", "class": "primary"})
-    </form>
+	<tr>
+		<td>
+			@component.InputCSRF(view.Get[string](ctx, "csrf"))
+			@component.Input(templ.Attributes{
+				"type": "text", "name": "username",
+				"value": r.V().GetString("username"), "required": true},
+			)
+		</td>
+		<td>
+			@component.Input(templ.Attributes{
+				"type": "email", "name": "email", "placeholder": "email",
+				"value": r.V().GetString("email"),
+			})
+		</td>
+		<td>
+			@component.Input(templ.Attributes{
+				"type": "tel", "name": "phone", "placeholder": "phone number",
+				"value": r.V().GetString("phone"),
+			})
+		</td>
+		<td>
+			<span class="action">
+				<i
+					class="fas fa-square-check button outline"
+					role="button"
+					hx-target="#content"
+					hx-include="closest tr"
+					{ attr... }
+				></i>
+				<i
+					class="fas fa-square-xmark button outline"
+					style="color:grey;"
+					role="button"
+					hx-get={ view.Reverse(ctx, "member.list", r.V().GetString("group")) }
+					hx-target="#content"
+				></i>
+			</span>
+		</td>
+	</tr>
 }
 
 templ GroupMemberList(groupID string, mm view.ViewData[service.RecordSlice]) {
-    <h3>
-        Members 
-        <i class="fa-solid fa-user-plus button" hx-get={view.Reverse(ctx, "member.create", groupID)} hx-target="#content" role="button"></i>
-    </h3>
-    @component.Table() {
-        <thead>
-            <tr>
-                <th>Nickname</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            for _, m := range mm.V() {
-            <tr>
-                <td><i class="fa-regular fa-user"></i> { m.GetString("username") }</td>
-                <td>{ m.GetString("email") }</td>
-                <td>{ m.GetString("phone") }</td>
-                <td>
-                    <span class="actions">
-                        <i class="fas fa-edit button outline" 
-                            role="button"
-                            hx-get={ view.Reverse(ctx, "member.edit", groupID, m.GetId()) } 
-                            hx-target="#content">
-                        </i>
-                        <i class="fas fa-trash-alt button outline"
-                            role="button"
-                            style="color:red;"
-                            hx-target="#content"
-                            hx-delete={ view.Reverse(ctx, "member.delete", groupID, m.GetId()) } 
-                            hx-confirm="Do you really want to delete this member?"
-                            hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }>
-                        </i>
-                    </span>
-                </td>
-            </tr>
-            }
-        </tbody>
-    }
+	<h3>
+		Members 
+	</h3>
+	@component.Table() {
+		<thead>
+			<tr>
+				<th>Nickname</th>
+				<th>Email</th>
+				<th>Phone</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, m := range mm.V() {
+				<tr>
+					<td><i class="fa-regular fa-user"></i> { m.GetString("username") }</td>
+					<td>{ m.GetString("email") }</td>
+					<td>{ m.GetString("phone") }</td>
+					<td>
+						<span class="actions">
+							<i
+								class="fas fa-edit button outline"
+								role="button"
+								hx-get={ view.Reverse(ctx, "member.edit", groupID, m.GetId()) }
+								hx-target="closest tr"
+								hx-swap="outerHTML"
+							></i>
+							<i
+								class="fas fa-trash-alt button outline"
+								role="button"
+								style="color:red;"
+								hx-target="#content"
+								hx-delete={ view.Reverse(ctx, "member.delete", groupID, m.GetId()) }
+								hx-confirm="Do you really want to delete this member?"
+								hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }
+							></i>
+						</span>
+					</td>
+				</tr>
+			}
+			<tr>
+				<td><i class="fa-regular fa-user"></i></td>
+				<td></td>
+				<td></td>
+				<td>
+					<i
+						class="fa-solid fa-user-plus button"
+						hx-get={ view.Reverse(ctx, "member.create", groupID) }
+						hx-target="closest tr"
+						hx-swap="outerHTML"
+						role="button"
+					></i>
+				</td>
+			</tr>
+		</tbody>
+	}
 }
