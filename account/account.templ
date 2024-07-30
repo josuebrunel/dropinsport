@@ -170,7 +170,7 @@ templ GroupListView(gg []models.Group, attr templ.Attributes) {
 								style="color:red;"
 								hx-target="#content"
 								hx-delete={ view.Reverse(ctx, "group.delete", g.ID) }
-								hx-confirm="Do you really want to delete this member?"
+								hx-confirm="Do you really want to delete this group?"
 								hx-headers={ fmt.Sprintf(`{"csrf": "%s"}`, view.Get[string](ctx, "csrf")) }
 							></i>
 						</span>
