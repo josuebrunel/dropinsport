@@ -1,5 +1,3 @@
-version: '3'
-
 services:
     db:
       container_name: sdi_db
@@ -27,9 +25,6 @@ services:
         ports:
             - "8999:8080"
             - "8998:4000"
-            # depends_on:
-            #   db:
-            #     condition: service_healthy
         networks:
           - sdi
         volumes:
@@ -43,14 +38,17 @@ services:
       env_file:
         - env
       ports:
-          - "8999:8080"
-      depends_on:
-        db:
-          condition: service_healthy
+          - "8997:8080"
       networks:
         - sdi
+      volumes:
+          - prod-data:/opt/sportix/pb_data/
+      restart: always
     
 
 networks:
   sdi:
     driver: bridge
+  
+volumes:
+  prod-data:
