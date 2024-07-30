@@ -83,6 +83,13 @@ func (a AccountHandler) Login(cx context.Context) echo.HandlerFunc {
 	}
 }
 
+func (a AccountHandler) Logout(cx context.Context) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		xsession.DeleteUser(c.Request().Context())
+		return c.Redirect(http.StatusSeeOther, view.ReverseX(c, "account.login"))
+	}
+}
+
 func (a AccountHandler) Get(cx context.Context) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sess := a.GetSession(c.Request().Context())

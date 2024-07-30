@@ -375,15 +375,23 @@ func AccountMenu() templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if xsession.IsAuthenticated(ctx) {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Hello ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><details class=\"dropdown\"><summary>Account</summary><ul><li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = component.Link(xsession.GetUser(ctx).Email, view.Reverse(ctx, "account.get", xsession.GetUser(ctx).ID), templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = component.Link("Profile", view.Reverse(ctx, "account.get", xsession.GetUser(ctx).ID), templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li><li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = component.Link("Logout", view.Reverse(ctx, "account.logout"), templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li></ul></details></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -142,6 +142,10 @@ func Set(c context.Context, name string, value any) {
 	SessionManager.Put(c, name, value)
 }
 
+func Delete(c context.Context, name string) {
+	SessionManager.Remove(c, name)
+}
+
 func SetUser(c context.Context, u XUser) {
 	b, _ := json.Marshal(u)
 	Set(c, SessionName, b)
@@ -152,6 +156,10 @@ func GetUser(c context.Context) XUser {
 	var u XUser
 	json.Unmarshal(b, &u)
 	return u
+}
+
+func DeleteUser(c context.Context) {
+	Delete(c, SessionName)
 }
 
 func IsAuthenticated(c context.Context) bool {

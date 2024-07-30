@@ -82,6 +82,7 @@ func (a App) Run() {
 		}))
 		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/login", Handler: accountHandler.Login(ctx), Name: "account.login"})
 		a.AddRoute(echo.Route{Method: http.MethodPost, Path: "/login", Handler: accountHandler.Login(ctx), Name: "account.login"})
+		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/logout", Handler: accountHandler.Logout(ctx), Name: "account.logout"})
 		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/:accountid", Handler: accountHandler.Get(ctx), Name: "account.get",
 			Middlewares: []echo.MiddlewareFunc{xsession.LoginRequired}})
 		a.AddRoute(echo.Route{Method: http.MethodGet, Path: "/register", Handler: accountHandler.Create(ctx), Name: "account.register"})

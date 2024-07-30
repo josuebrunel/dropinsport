@@ -67,10 +67,19 @@ templ Index() {
 
 templ AccountMenu() {
 	if xsession.IsAuthenticated(ctx) {
-		<p>
-			Hello 
-			@component.Link(xsession.GetUser(ctx).Email, view.Reverse(ctx, "account.get", xsession.GetUser(ctx).ID), templ.Attributes{})
-		</p>
+		<li>
+			<details class="dropdown">
+				<summary>Account</summary>
+				<ul>
+					<li>
+						@component.Link("Profile", view.Reverse(ctx, "account.get", xsession.GetUser(ctx).ID), templ.Attributes{})
+					</li>
+					<li>
+						@component.Link("Logout", view.Reverse(ctx, "account.logout"), templ.Attributes{})
+					</li>
+				</ul>
+			</details>
+		</li>
 	} else {
 		<ul>
 			<li>
