@@ -135,7 +135,7 @@ func (c *Client) UserAuth(username, password string) (*http.Response, error) {
 }
 
 func (c *Client) RecordCreate(name string, qs ...IQ) (*http.Response, error) {
-	return c.Request(http.MethodPost, EndpointRecords, qs...)
+	return c.Request(http.MethodPost, EndpointRecords, append(qs, QParams{name})...)
 }
 
 func (c *Client) RecordGet(name string, id string, qs ...IQ) (*http.Response, error) {
