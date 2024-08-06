@@ -1,6 +1,9 @@
 package util
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 func Deref[T any](t *T) T {
 	var r T
@@ -16,6 +19,14 @@ func AssertType[T any](val any) T {
 		r = v
 	}
 	return r
+}
+
+func F64(s string) float64 {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return 0
+	}
+	return v
 }
 
 func F64Fmt(v float64, f string) string {

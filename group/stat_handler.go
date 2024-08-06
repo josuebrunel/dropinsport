@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -17,7 +18,7 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-func memberStatsToData(schema SportStatSchema, rr service.RecordSlice) []map[string]string {
+func memberStatsToData(sport models.Sport, rr service.RecordSlice) []map[string]string {
 	data := collection.Transform(rr, func(r service.Record) map[string]string {
 		d := map[string]string{}
 		d["id"] = r.GetId()
@@ -28,8 +29,8 @@ func memberStatsToData(schema SportStatSchema, rr service.RecordSlice) []map[str
 			var stats = make(map[string]string)
 			d["stats_id"] = stat.GetId()
 			stat.UnmarshalJSONField("stats", &stats)
-			for _, k := range schema {
-				d[k["abbr"]] = stats[k["abbr"]]
+			for _, k := range sport.Data.Stats {
+				d[k.Abbr] = stats[k.Abbr]
 			}
 		}
 		return d
@@ -37,7 +38,7 @@ func memberStatsToData(schema SportStatSchema, rr service.RecordSlice) []map[str
 	return data
 }
 
-func formDataToRequests(groupID, seasonID string, formData map[string]any, schema SportStatSchema) service.Requests {
+func formDataToRequests(groupID string, formData map[string]any, sport models.Sport) service.Requests {
 	requests := map[string]service.Request{}
 	stats := map[string]map[string]string{}
 	for field, value := range formData {
@@ -45,7 +46,7 @@ func formDataToRequests(groupID, seasonID string, formData map[string]any, schem
 		if len(sf) > 1 {
 			id, fname := sf[0], sf[1]
 			// process stat fields
-			if collection.Exists(schema, func(s map[string]string) bool { return strings.EqualFold(s["abbr"], fname) }) {
+			if collection.Exists(sport.Data.Stats, func(s models.SportStat) bool { return strings.EqualFold(s.Abbr, fname) }) {
 				if v, ok := stats[id]; ok {
 					v[fname] = util.F64Fmt(util.AssertType[float64](value), "%.f")
 				} else {
@@ -84,7 +85,7 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		groupID := ctx.PathParam(h.svc.GetID())
 		group, _ := h.GetGroup(groupID)
-		schema := h.GetGroupSportStatSchema(context, groupID)
+		sport := h.GetGroupSport(context, groupID)
 		seasonID := ctx.QueryParam("season")
 		if strings.EqualFold(seasonID, "") {
 			curSeason, err := h.GetGroupCurrentSeason(context, groupID)
@@ -110,11 +111,14 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 			_ = service.UnmarshalTo(group, &m)
 			m.Extra = models.Extra{"curseason": seasonID}
 
-			data := memberStatsToData(schema, members.V())
+			data := memberStatsToData(sport, members.V())
+			sort.Slice(data, func(i, j int) bool {
+				return util.F64(data[i][sport.Data.Top.Abbr]) > util.F64(data[j][sport.Data.Top.Abbr])
+			})
 			xlog.Debug("members stats", "stats", data)
 			return view.Render(ctx, http.StatusOK,
 				GroupStatForm(
-					m, schema, data,
+					m, sport, data,
 					templ.Attributes{"hx-post": ctx.RouteInfo().Reverse(groupID), "hx-target": "#content"}),
 				nil)
 		}
@@ -124,7 +128,7 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 		}
 
 		seasonID = req["season"].(string)
-		reqs := formDataToRequests(groupID, seasonID, req, schema)
+		reqs := formDataToRequests(groupID, req, sport)
 		xlog.Debug("request data", "requests", reqs)
 		_, err = statSVC.BulkUpsert(context, reqs)
 		if err != nil {
@@ -141,12 +145,15 @@ func (h GroupHandler) StatCreate(context context.Context) echo.HandlerFunc {
 			xlog.Error("error while getting members and stats", "group", groupID, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		data := memberStatsToData(schema, members.V())
+		data := memberStatsToData(sport, members.V())
+		sort.Slice(data, func(i, j int) bool {
+			return util.F64(data[i][sport.Data.Top.Abbr]) > util.F64(data[j][sport.Data.Top.Abbr])
+		})
 		xlog.Debug("members stats", "stats", data)
 		var m models.Group
 		_ = service.UnmarshalTo(group, &m)
 		m.Extra = models.Extra{"curseason": seasonID}
-		return view.Render(ctx, http.StatusOK, GroupStatList(m, data, schema), nil)
+		return view.Render(ctx, http.StatusOK, GroupStatList(m, data, sport), nil)
 	}
 }
 
@@ -174,13 +181,16 @@ func (h GroupHandler) StatList(context context.Context) echo.HandlerFunc {
 			xlog.Error("error while getting members and stats", "group", groupID, "error", err)
 			return view.Render(ctx, http.StatusOK, component.Error(err.Error()), nil)
 		}
-		schema := h.GetGroupSportStatSchema(context, groupID)
-		xlog.Debug("members and stats", "members", members, "schema", schema, "group", group)
-		data := memberStatsToData(schema, members.V())
+		sport := h.GetGroupSport(context, groupID)
+		xlog.Debug("members and stats", "members", members, "sport", sport, "group", group)
+		data := memberStatsToData(sport, members.V())
+		sort.Slice(data, func(i, j int) bool {
+			return util.F64(data[i][sport.Data.Top.Abbr]) > util.F64(data[j][sport.Data.Top.Abbr])
+		})
+		xlog.Debug("stats", "stats", data)
 		var m models.Group
 		_ = service.UnmarshalTo(group, &m)
 		m.Extra = models.Extra{"curseason": seasonID}
-		xlog.Debug("stats", "stats", data)
-		return view.Render(ctx, http.StatusOK, GroupStatList(m, data, schema), nil)
+		return view.Render(ctx, http.StatusOK, GroupStatList(m, data, sport), nil)
 	}
 }

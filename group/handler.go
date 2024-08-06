@@ -32,14 +32,6 @@ var (
 	sportSVC  service.Service
 )
 
-type (
-	SportStatSchema = []map[string]string
-	SportMetaData   struct {
-		Icon  string          `json:"icon"`
-		Stats SportStatSchema `json:"stats"`
-	}
-)
-
 type GroupHandler struct {
 	svc service.Service
 	api pb.Client
@@ -61,16 +53,16 @@ func (h GroupHandler) GetGroup(id string) (service.Record, error) {
 	return v.V(), err
 }
 
-func (h GroupHandler) GetGroupSportStatSchema(ctx context.Context, groupID string) SportStatSchema {
+func (h GroupHandler) GetGroupSport(ctx context.Context, groupID string) models.Sport {
 	group, err := h.svc.GetByID(ctx, groupID, "sport")
 	if err != nil {
-		return SportStatSchema{}
+		return models.Sport{}
 	}
-	var md SportMetaData
+	var s models.Sport
 	sport := group.Data.ExpandedOne("sport")
-	sport.UnmarshalJSONField("data", &md)
-	xlog.Debug("schema", "schema", md)
-	return md.Stats
+	service.UnmarshalTo(sport, &s)
+	xlog.Debug("group's sport", "sport", s)
+	return s
 }
 
 func (h GroupHandler) GetGroupCurrentSeason(ctx context.Context, groupID string) (service.Record, error) {

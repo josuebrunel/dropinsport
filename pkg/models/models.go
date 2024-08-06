@@ -47,6 +47,12 @@ type UserExpandGroup struct {
 	} `json:"expand,omitempty"`
 }
 
+type SportTop struct {
+	Abbr  string `json:"abbr"`
+	Icon  string `json:"icon"`
+	Color string `json:"color"`
+}
+
 type SportStat struct {
 	Abbr string `json:"abbr"`
 	Name string `json:"name"`
@@ -55,6 +61,7 @@ type SportStat struct {
 }
 type SportData struct {
 	Icon  string      `json:"icon"`
+	Top   SportTop    `json:"top"`
 	Stats []SportStat `json:"stats"`
 }
 type Sport struct {

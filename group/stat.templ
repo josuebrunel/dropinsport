@@ -14,7 +14,7 @@ func genFieldName(prefix, value string) string {
 	return fmt.Sprintf("%s:%s", prefix, value)
 }
 
-templ GroupStatForm(group models.Group, schema SportStatSchema, members []map[string]string, attr templ.Attributes) {
+templ GroupStatForm(group models.Group, sport models.Sport, members []map[string]string, attr templ.Attributes) {
 	<h3>Stats</h3>
 	<form { attr... }>
 		@component.InputCSRF(view.Get[string](ctx, "csrf"))
@@ -29,8 +29,8 @@ templ GroupStatForm(group models.Group, schema SportStatSchema, members []map[st
 			<thead>
 				<tr>
 					<th>Nickname</th>
-					for _, field := range schema {
-						<th><abbr title={ field["name"] }>{ field["abbr"] }</abbr></th>
+					for _, field := range sport.Data.Stats {
+						<th><abbr title={ field.Name }>{ field.Abbr }</abbr></th>
 					}
 				</tr>
 			</thead>
@@ -41,13 +41,13 @@ templ GroupStatForm(group models.Group, schema SportStatSchema, members []map[st
 							{ m["username"] }@component.InputHidden(genFieldName(m["id"], "member"), m["id"])
 							@component.InputHidden(genFieldName(m["id"], "id"), m["stats_id"])
 						</td>
-						for _, f := range schema {
+						for _, f := range sport.Data.Stats {
 							<td>
 								@component.Input(templ.Attributes{
-									"name":  genFieldName(m["id"], f["abbr"]),
-									"type":  f["type"],
-									"value": m[f["abbr"]],
-									"step":  1,
+									"name":  genFieldName(m["id"], f.Abbr),
+									"type":  f.Type,
+									"value": m[f.Abbr],
+									"step":  f.Step,
 								})
 							</td>
 						}
@@ -59,7 +59,7 @@ templ GroupStatForm(group models.Group, schema SportStatSchema, members []map[st
 	</form>
 }
 
-templ GroupStatList(group models.Group, stats []map[string]string, schema SportStatSchema) {
+templ GroupStatList(group models.Group, stats []map[string]string, sport models.Sport) {
 	<h3>
 		Stats
 		if strings.EqualFold(xsession.GetUser(ctx).ID, group.Expand.User.ID) {
@@ -77,17 +77,25 @@ templ GroupStatList(group models.Group, stats []map[string]string, schema SportS
 		<thead>
 			<tr>
 				<th>Nickname</th>
-				for _, field := range schema {
-					<th><abbr title={ field["name"] }>{ field["abbr"] }</abbr></th>
+				for _, field := range sport.Data.Stats {
+					<th><abbr title={ field.Name }>{ field.Abbr }</abbr></th>
 				}
 			</tr>
 		</thead>
 		<tbody>
-			for _, m := range stats {
+			for i, m := range stats {
 				<tr>
-					<td><i class="fa-regular fa-user"></i> { m["username"] }</td>
-					for _, f := range schema {
-						<td>{ m[f["abbr"]] }</td>
+					<td>
+						if i == 0 {
+							// <i class={sport.Data.Top.Icon} style={fmt.Sprintf("color:%s", sport.Data.Top.Color)}></i>
+							<i class={ sport.Data.Top.Icon } style="color:#ffd43b;"></i>
+						} else {
+							<i class="fa-regular fa-user"></i>
+						}
+						{ m["username"] }
+					</td>
+					for _, f := range sport.Data.Stats {
+						<td>{ m[f.Abbr] }</td>
 					}
 				</tr>
 			}
