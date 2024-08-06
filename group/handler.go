@@ -177,8 +177,9 @@ func (h GroupHandler) Update(context context.Context) echo.HandlerFunc {
 func (h GroupHandler) List(context context.Context) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var filters = make(map[string]any)
-		if city := c.QueryParam("search"); city != "" {
+		if city := c.QueryParam("search"); !strings.EqualFold(city, "") {
 			filters["city"] = city
+			xlog.Debug("filters are", "filters", filters, "city", city)
 		}
 		resp, err := h.svc.List(context, filters, "sport")
 		if err != nil {

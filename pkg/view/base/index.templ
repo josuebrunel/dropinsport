@@ -30,7 +30,7 @@ templ Main(attr templ.Attributes) {
 }
 
 templ SearchBar() {
-	<form role="search" hx-get="/group" hx-trigger="click" hx-target="#container">
+	<form role="search" hx-get={ view.Reverse(ctx, "group.list") } hx-trigger="submit" hx-target="#groups">
 		<input class="search-bar" type="search" name="search" id="search" placeholder="Search"/>
 	</form>
 }
@@ -61,7 +61,7 @@ templ Index() {
 		@Header() {
 			@SearchBar()
 		}
-		@component.Main(templ.Attributes{"class": "container", "id": "container", "hx-trigger": "load", "hx-get": "/group"})
+		@component.Main(templ.Attributes{"class": "container", "id": "container", "hx-trigger": "load once", "hx-get": view.Reverse(ctx, "group.list")})
 	}
 }
 

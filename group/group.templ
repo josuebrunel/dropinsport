@@ -67,7 +67,7 @@ templ GroupFormView(r view.ViewData[service.Record], sports view.ViewData[servic
 }
 
 templ GroupListView(gg view.ViewData[service.RecordSlice]) {
-	<div id="groups" hx-get={ view.Reverse(ctx, "group.list") } hx-trigger="groupChange from:body" hx-target="this">
+	<div id="groups">
 		if len(gg.V()) == 0 {
 			<p>No group found</p>
 		}
