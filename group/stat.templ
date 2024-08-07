@@ -90,7 +90,7 @@ templ GroupStatList(group models.Group, stats []map[string]string, sport models.
 							// <i class={sport.Data.Top.Icon} style={fmt.Sprintf("color:%s", sport.Data.Top.Color)}></i>
 							<i class={ sport.Data.Top.Icon } style="color:#ffd43b;"></i>
 						} else {
-							<i class="fa-regular fa-user"></i>
+							{ fmt.Sprintf("%d", i+1) }
 						}
 						{ m["username"] }
 					</td>
