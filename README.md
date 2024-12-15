@@ -1,2 +1,3 @@
 # dropinsport
-A simple application to list and manage sports drop-ins 
+A simple application I built to explore *HTMX* and *POCKETBASE* . 
+Don't expect a production ready app
